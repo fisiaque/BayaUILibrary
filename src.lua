@@ -18,34 +18,87 @@ local theme = {
     FontSemiBold = Font.fromEnum(Enum.Font.Arial, Enum.FontWeight.SemiBold)
 };
 local assets = {
-    ["Baya/Assets/GUILogo.png"] = "rbxassetid://100130787086109",
+    ["Baya/UIAssets/GUILogo.png"] = "rbxassetid://100130787086109",
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
 local getcustomasset
+local marked = "--MARKED: DELETE IF CACHED INCASE BAYA UPDATES.\n"
 
--- creates a safe reference to a roblox instance object if executor doesn't already have on pre-built
+-- creates a safe reference to a roblox instance object if executor doesn"t already have on pre-built
 local cloneref = cloneref or function(obj)
     return obj
 end
 
 -- services
 local runService = cloneref(game:GetService("RunService"));
-local guiService = cloneref(game:GetService('GuiService'));
+local guiService = cloneref(game:GetService("GuiService"));
 local inputService = cloneref(game:GetService("UserInputService"));
+
+-- get asset
+getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
+	return DownloadFile(path, assetfunction)
+end or function(path)
+	return assets[path] or ""
+end
+
+local isfile = isfile or function(file)
+	local suc, res = pcall(function()
+		return readfile(file)
+	end)
+	return suc and res ~= nil and res ~= ""
+end
+local delfile = delfile or function(file)
+	writefile(file, "");
+end
+
+local function DownloadFile(path, func)
+    if not isfile(path) then
+        SetDownloadMessage(path)
+
+        local suc, res = pcall(function()
+            return game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/"..readfile("Baya/commit.txt").."/"..select(1, path:gsub("Baya/", "")), true)
+        end)
+
+        if not suc or res == "404: Not Found" then
+            error(res)
+        end
+
+        if path:find(".lua") then
+            res = marked .. res
+        end
+
+        writefile(path, res)
+    end
+
+    return (func or readfile)(path)
+end
+
+-- wipe folder
+local function WipeFolder(path)
+    -- check path
+    if not isfolder(path) then return end
+
+    for _, file in listfiles(path) do
+        if isfile(file) and select(1, readfile(file):find(marked)) == 1 then
+            print("Deleting")
+            delfile(file)
+        end
+    end
+end
 
 -- clean 
 local function AddMaid(object)
 	object.Connections = {}
 	function object:Clean(callback)
-		if typeof(callback) == 'Instance' then
+		if typeof(callback) == "Instance" then
 			table.insert(self.Connections, {
 				Disconnect = function()
 					callback:ClearAllChildren()
 					callback:Destroy()
 				end
 			})
-		elseif type(callback) == 'function' then
+		elseif type(callback) == "function" then
 			table.insert(self.Connections, {
 				Disconnect = callback
 			})
@@ -89,7 +142,7 @@ local function SetDownloadMessage(text)
 	if library.Loaded ~= true then
 		local loadingLabel = library.Downloader
 		if not loadingLabel then
-			loadingLabel = Instance.new('TextLabel')
+			loadingLabel = Instance.new("TextLabel")
 			loadingLabel.Size = UDim2.new(1, 0, 0, 40)
 			loadingLabel.BackgroundTransparency = 1
 			loadingLabel.TextStrokeTransparency = 0
@@ -99,19 +152,8 @@ local function SetDownloadMessage(text)
 			loadingLabel.Parent = library.gui
 			library.Downloader = loadingLabel
 		end
-		loadingLabel.Text = 'Downloading ' .. text
+		loadingLabel.Text = "Downloading " .. text
 	end
-end
-
-
-local function DownloadFile(path, func)
-    if not isfile(path) then
-        SetDownloadMessage(path)
-
-        local suc, res = pcall(function()
-            return game:HttpGet("", true)
-        end)
-    end
 end
 
 -- generates a random string
@@ -137,16 +179,31 @@ do
         return Color3.fromHSV(h, s, math.clamp(select(3, theme.Main:ToHSV()) > 0.5 and v - num or v + num, 0, 1))
     end
 end
-
--- get asset
-getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
-	return DownloadFile(path, assetfunction)
-end or function(path)
-	return assets[path] or ''
-end
-
 -- 
 AddMaid(library)
+
+-- folder creation
+for _, folder in {'Baya', 'Baya/UIAssets'} do
+	if not isfolder(folder) then
+		makefolder(folder)
+	end
+end
+
+-- update baya library
+local _, subbed = pcall(function()
+    return game:HttpGet('https://github.com/fisiaque/BayaUILibrary')
+end)
+
+local commit = subbed:find('currentOid')
+commit = commit and subbed:sub(commit + 13, commit + 52) or nil
+commit = commit and #commit == 40 and commit or 'main'
+
+if commit == 'main' or (isfile('Baya/commit.txt') and readfile('Baya/commit.txt') or '') ~= commit then
+    wipeFolder('Baya')
+    wipeFolder('Baya/UIAssets')
+end
+
+writefile('Baya/commit.txt', commit)
 
 -- gui creation
 local gui = Instance.new("ScreenGui");
@@ -223,7 +280,7 @@ function library:CreateGUI()
     logo.Size = UDim2.fromOffset(62, 18);
     logo.Position = UDim2.fromOffset(11, 10);
     logo.BackgroundTransparency = 1;
-    logo.Image = GetAsset('Baya/Assets/GUILogo.png')
+    logo.Image = GetAsset("Baya/UIAssets/GUILogo.png")
     logo.ImageColor3 = select(3, theme.Main:ToHSV()) > 0.5 and theme.Text or Color3.new(1, 1, 1);
     logo.Parent = window
 
