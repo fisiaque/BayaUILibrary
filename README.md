@@ -1,0 +1,18 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./README/BayaLogo_White.png">
+    <source media="(prefers-color-scheme: light)" srcset="./README/BayaLogo_Black.png">
+    <img alt="baya logo" src="./README/BayaLogo.png">
+  </picture>
+</p>
+<h2 align="center">
+  A Roblox UI Library Catered for ME & YOU!
+  <br/>
+  Reach the top without ever being caught.
+</h2>
+
+## Usage (WIP)
+1. Run the following loadstring in Roblox: 
+```luau
+loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))()
+```
