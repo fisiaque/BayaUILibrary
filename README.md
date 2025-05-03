@@ -6,9 +6,9 @@
   </picture>
 </p>
 <h2 align="center">
-  A Roblox UI Library Catered for ME & YOU!
+  A Roblox UI Library
   <br/>
-  Reach the top without ever being caught.
+   Catered for ME & YOU!
 </h2>
 
 ## Usage (WIP)
