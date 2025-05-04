@@ -5,12 +5,11 @@
 --  \/_____/   \/_/\/_/   \/_____/   \/_/\/_/      \/_____/   \/_/      \/_____/   \/_/   \/_____/   \/_/ /_/   \/_/\/_/   \/_/ /_/   \/_____/ 
                                                                                                                                                                                                                          
 local library = {
-    Windows = {};
     Categories = {};
     Libraries = {};
     Keybinds = {
         Held = {};
-        Interact = "End"
+        Interact = {"KeypadPeriod"}
     };
     Loaded = false;
     Place = game.PlaceId;
@@ -40,11 +39,15 @@ local assets = {
     ["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
     ["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
     ["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
+    ["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://120654586984889";
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
 local getcustomasset
 local marked = "--MARKED: DELETE IF CACHED INCASE BAYA UPDATES.\n"
+
+-- category previous position for window
+local pp = UDim2.fromOffset(236, 60)
 
 -- creates a safe reference to a roblox instance object if executor doesn"t already have on pre-built
 local cloneref = cloneref or function(obj)
@@ -103,9 +106,27 @@ local function DownloadFile(path, func)
     return (func or readfile)(path)
 end
 
+-- rearrange
+local function RearrangeButton(optionapi, _bool)
+    optionapi.Enabled = _bool
+    
+    tween:Tween(optionapi.Object.Arrow, theme.Tween, {
+        Position = UDim2.new(1, optionapi.Enabled and -14 or -20, 0, 16)
+    })
+
+    optionapi.Object.TextColor3 = optionapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
+    
+    if optionapi.Icon then
+        optionapi.Icon.ImageColor3 = optionapi.Object.TextColor3
+    end
+    
+    optionapi.Object.BackgroundColor3 = optionapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
+    optionapi.Settings.Window.Visible = optionapi.Enabled
+end
+
 -- check keybinding
 local function CheckKeybinds(compare, target, key)
-	if type(target) == 'table' then
+	if type(target) == "table" then
 		if table.find(target, key) then
 			for i, v in target do
 				if not table.find(compare, v) then
@@ -352,118 +373,120 @@ tooltip.Parent = scaledFrame
 
 -- library
 function library:CreateGUI()
-    local categoryapi = {
-        Type = "MainWindow";
-        Buttons = {};
-        Options = {};
-    }
+	local categoryapi = {
+		Type = "MainWindow";
+		Buttons = {};
+		Options = {};
+	}
 
-    local window = Instance.new("TextButton");
-    window.Name = "GUICategory";
-    window.Position = UDim2.fromOffset(6, 60);
-    window.BackgroundColor3 = color.Darken(theme.Main, 0.02);
-    window.AutoButtonColor = false
-    window.Text = "";
-    window.Parent = clickFrame;
+	local window = Instance.new("TextButton");
+	window.Name = "GUICategory";
+	window.Position = UDim2.fromOffset(6, 60);
+	window.BackgroundColor3 = color.Darken(theme.Main, 0.02);
+	window.AutoButtonColor = false
+	window.Text = "";
+	window.Parent = clickFrame;
 
-    Dragify(window)
+	Dragify(window)
 
-    local logo = Instance.new("ImageLabel");
-    logo.Name = "BayaLogo";
-    logo.Size = UDim2.fromOffset(62, 18);
-    logo.Position = UDim2.fromOffset(11, 10);
-    logo.BackgroundTransparency = 1;
-    logo.Image = getcustomasset("Baya/UIAssets/GUILogo.png");
-    logo.ImageColor3 = select(3, theme.Main:ToHSV()) > 0.5 and theme.Text or Color3.new(1, 1, 1);
-    logo.Parent = window
+	local logo = Instance.new("ImageLabel");
+	logo.Name = "BayaLogo";
+	logo.Size = UDim2.fromOffset(62, 18);
+	logo.Position = UDim2.fromOffset(11, 10);
+	logo.BackgroundTransparency = 1;
+	logo.Image = getcustomasset("Baya/UIAssets/GUILogo.png");
+	logo.ImageColor3 = select(3, theme.Main:ToHSV()) > 0.5 and theme.Text or Color3.new(1, 1, 1);
+	logo.Parent = window
 
-    local children = Instance.new("Frame");
-    children.Name = "Children";
-    children.Size = UDim2.new(1, 0, 1, -33);
-    children.Position = UDim2.fromOffset(0, 37);
-    children.BackgroundTransparency = 1;
-    children.Parent = window
+	local children = Instance.new("Frame");
+	children.Name = "Children";
+	children.Size = UDim2.new(1, 0, 1, -33);
+	children.Position = UDim2.fromOffset(0, 37);
+	children.BackgroundTransparency = 1;
+	children.Parent = window
 
-    local windowList = Instance.new("UIListLayout");
-    windowList.SortOrder = Enum.SortOrder.LayoutOrder;
-    windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
-    windowList.Parent = children
+	local windowList = Instance.new("UIListLayout");
+	windowList.SortOrder = Enum.SortOrder.LayoutOrder;
+	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+	windowList.Parent = children
 
-    categoryapi.Object = window
+	categoryapi.Object = window
 
-    function categoryapi:CreateButton(categorySettings)
-        local optionapi = {
-            Enabled = false;
-            Index = GetTableSize(categoryapi.Buttons)
-        }
+	function categoryapi:CreateButton(categorySettings)
+		local optionapi = {
+			Enabled = false;
+			Index = GetTableSize(categoryapi.Buttons);
+			Settings = categorySettings;
+		}
 
-        -- create main window button
-        local button = Instance.new("TextButton");
-        button.Name = categorySettings.Name;
-        button.Size = UDim2.fromOffset(220, 40);
-        button.BackgroundColor3 = theme.Main;
-        button.BorderSizePixel = 0;
-        button.AutoButtonColor = false;
-        button.Text = (categorySettings.Icon and "                                 " or "             ")..categorySettings.Name;
-        button.TextXAlignment = Enum.TextXAlignment.Left;
+		-- create main window button
+		local button = Instance.new("TextButton");
+		button.Name = categorySettings.Name;
+		button.Size = UDim2.fromOffset(220, 40);
+		button.BackgroundColor3 = theme.Main;
+		button.BorderSizePixel = 0;
+		button.AutoButtonColor = false;
+		button.Text = (categorySettings.Icon and "                                 " or "             ")..categorySettings.Name;
+		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
 		button.FontFace = theme.Font;
 		button.Parent = children;
 
-        -- create icon if being received
-        local icon
+		-- create icon if being received
+		local icon
 
-        if categorySettings.Icon then
-            icon = Instance.new("ImageLabel");
-            icon.Name = "Icon";
-            icon.Size = categorySettings.Size;
-            icon.Position = UDim2.fromOffset(13, 13);
-            icon.BackgroundTransparency = 1;
-            icon.Image = categorySettings.Icon;
-            icon.ImageColor3 = color.Darken(theme.Text, 0.15);
-            icon.Parent = button;
-        end
+		if categorySettings.Icon then
+			icon = Instance.new("ImageLabel");
+			icon.Name = "Icon";
+			icon.Size = categorySettings.Size;
+			icon.Position = UDim2.fromOffset(13, 13);
+			icon.BackgroundTransparency = 1;
+			icon.Image = categorySettings.Icon;
+			icon.ImageColor3 = color.Darken(theme.Text, 0.15);
+			icon.Parent = button;
+		end
 
-        -- create arrow
-        local arrow = Instance.new("ImageLabel");
-        arrow.Name = "Arrow";
-        arrow.Size = UDim2.fromOffset(4, 8);
-        arrow.Position = UDim2.new(1, -20, 0, 16);
-        arrow.BackgroundTransparency = 1;
-        arrow.Image = getcustomasset("Baya/UIAssets/ExpandRight.png");
-        arrow.ImageColor3 = color.Lighten(theme.Main, 0.35);
-        arrow.Parent = button;
+		-- create arrow
+		local arrow = Instance.new("ImageLabel");
+		arrow.Name = "Arrow";
+		arrow.Size = UDim2.fromOffset(4, 8);
+		arrow.Position = UDim2.new(1, -20, 0, 16);
+		arrow.BackgroundTransparency = 1;
+		arrow.Image = getcustomasset("Baya/UIAssets/ExpandRight.png");
+		arrow.ImageColor3 = color.Lighten(theme.Main, 0.35);
+		arrow.Parent = button;
 
-        optionapi.Name = categorySettings.Name;
-        optionapi.Icon = icon;
-        optionapi.Object = button;
+		optionapi.Name = categorySettings.Name;
+		optionapi.Icon = icon;
+		optionapi.Object = button;
+		
+		-- button toggle
+		function optionapi:Toggle()
+			for _, _button in library.Categories.Main.Buttons do
+				if _button ~= library.Categories.Main.Buttons[optionapi.Name] and _button.Enabled then
+					RearrangeButton(_button, false) -- close
+					
+					pp = _button.Settings.Window.Position
+				end
+			end
+			
+			RearrangeButton(self, not self.Enabled)
+			
+			if self.Enabled == false then -- if button closed then save previous position
+				pp = optionapi.Settings.Window.Position
+			end
 
-        -- button toggle
-        function optionapi:Toggle()
-            self.Enabled = not self.Enabled
+			self.Settings.Window.Position = pp
+		end
 
-            tween:Tween(arrow, theme.Tween, {
-                Position = UDim2.new(1, self.Enabled and -14 or -20, 0, 16)
-            })
-
-            button.TextColor3 = self.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
-        
-            if icon then
-                icon.ImageColor3 = button.TextColor3
-            end
-
-            button.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
-            categorySettings.Window.Visible = self.Enabled
-        end
-
-        button.MouseEnter:Connect(function()
-            if not optionapi.Enabled then
-                button.TextColor3 = theme.Text
+		button.MouseEnter:Connect(function()
+			if not optionapi.Enabled then
+				button.TextColor3 = theme.Text
 				button.BackgroundColor3 = color.Lighten(theme.Main, 0.02)
-            end
-        end)
-        button.MouseLeave:Connect(function()
+			end
+		end)
+		button.MouseLeave:Connect(function()
 			if not optionapi.Enabled then
 				button.TextColor3 = color.Darken(theme.Text, 0.16)
 				button.BackgroundColor3 = theme.Main
@@ -476,9 +499,9 @@ function library:CreateGUI()
 		categoryapi.Buttons[categorySettings.Name] = optionapi
 
 		return optionapi
-    end
+	end
 
-    windowList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	windowList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		if self.ThreadFix then
 			setthreadidentity(8)
 		end
@@ -492,74 +515,74 @@ function library:CreateGUI()
 
 	self.Categories.Main = categoryapi
 
-    return categoryapi
+	return categoryapi
 end
 
 function library:CreateCategory(categorySettings)
-    local categoryapi = {
-        Type = "Category";
-        Expanded = false
-    }
-    -- create window category
-    local window = Instance.new("TextButton");
-    window.Name = categorySettings.Name .. "Category";
-    window.Size = UDim2.fromOffset(220, 41);
-    window.Position = UDim2.fromOffset(236, 60);
-    window.BackgroundColor3 = theme.Main;
-    window.AutoButtonColor = false;
-    window.Visible = false;
-    window.Text = "";
-    window.Parent = clickFrame;
+	local categoryapi = {
+		Type = "Category";
+		Expanded = false
+	}
+	-- create window category
+	local window = Instance.new("TextButton");
+	window.Name = categorySettings.Name .. "Category";
+	window.Size = UDim2.fromOffset(220, 41);
+	window.Position = pp;
+	window.BackgroundColor3 = theme.Main;
+	window.AutoButtonColor = false;
+	window.Visible = false;
+	window.Text = "";
+	window.Parent = clickFrame;
 
-    Dragify(window)
+	Dragify(window)
 
-    -- create icon 
-    local icon = Instance.new("ImageLabel");
-    icon.Name = "Icon";
-    icon.Size = categorySettings.Size;
-    icon.Position = UDim2.fromOffset(12, (icon.Size.X.Offset > 20 and 14 or 13));
-    icon.BackgroundTransparency = 1;
-    icon.Image = categorySettings.Icon;
-    icon.ImageColor3 = theme.Text;
-    icon.Parent = window
+	-- create icon 
+	local icon = Instance.new("ImageLabel");
+	icon.Name = "Icon";
+	icon.Size = categorySettings.Size;
+	icon.Position = UDim2.fromOffset(12, (icon.Size.X.Offset > 20 and 14 or 13));
+	icon.BackgroundTransparency = 1;
+	icon.Image = categorySettings.Icon;
+	icon.ImageColor3 = theme.Text;
+	icon.Parent = window
 
-    -- create title
-    local title = Instance.new("TextLabel");
-    title.Name = "Title";
-    title.Size = UDim2.new(1, -(categorySettings.Size.X.Offset > 18 and 40 or 33), 0, 41);
-    title.Position = UDim2.fromOffset(math.abs(title.Size.X.Offset), 0);
-    title.BackgroundTransparency = 1;
-    title.Text = categorySettings.Name;
-    title.TextXAlignment = Enum.TextXAlignment.Left;
-    title.TextColor3 = theme.Text;
-    title.TextSize = 14;
-    title.FontFace = theme.Font;
-    title.Parent = window;
+	-- create title
+	local title = Instance.new("TextLabel");
+	title.Name = "Title";
+	title.Size = UDim2.new(1, -(categorySettings.Size.X.Offset > 18 and 40 or 33), 0, 41);
+	title.Position = UDim2.fromOffset(math.abs(title.Size.X.Offset), 0);
+	title.BackgroundTransparency = 1;
+	title.Text = categorySettings.Name;
+	title.TextXAlignment = Enum.TextXAlignment.Left;
+	title.TextColor3 = theme.Text;
+	title.TextSize = 14;
+	title.FontFace = theme.Font;
+	title.Parent = window;
 
-    -- arrow button
-    local arrowButton = Instance.new("TextButton");
-    arrowButton.Name = "Arrow";
-    arrowButton.Size = UDim2.fromOffset(40, 40);
-    arrowButton.Position = UDim2.new(1, -40, 0, 0);
-    arrowButton.BackgroundTransparency = 1;
-    arrowButton.Text = "";
-    arrowButton.Parent = window;
+	-- arrow button
+	local arrowButton = Instance.new("TextButton");
+	arrowButton.Name = "Arrow";
+	arrowButton.Size = UDim2.fromOffset(40, 40);
+	arrowButton.Position = UDim2.new(1, -40, 0, 0);
+	arrowButton.BackgroundTransparency = 1;
+	arrowButton.Text = "";
+	arrowButton.Parent = window;
 
-    -- arrow image
-    local arrow = Instance.new("ImageLabel");
-    arrow.Name = "Arrow";
-    arrow.Size = UDim2.fromOffset(9, 4);
-    arrow.Position = UDim2.fromOffset(20, 18);
-    arrow.BackgroundTransparency = 1;
-    arrow.Image = getcustomasset("Baya/UIAssets/ExpandUp.png");
-    arrow.ImageColor3 = Color3.fromRGB(150, 150, 150);
-    arrow.Rotation = 180;
-    arrow.Parent = arrowButton;
+	-- arrow image
+	local arrow = Instance.new("ImageLabel");
+	arrow.Name = "Arrow";
+	arrow.Size = UDim2.fromOffset(9, 4);
+	arrow.Position = UDim2.fromOffset(20, 18);
+	arrow.BackgroundTransparency = 1;
+	arrow.Image = getcustomasset("Baya/UIAssets/ExpandUp.png");
+	arrow.ImageColor3 = Color3.fromRGB(150, 150, 150);
+	arrow.Rotation = 180;
+	arrow.Parent = arrowButton;
 
-    -- scrolling frame
-    local children = Instance.new("ScrollingFrame");
-    children.Name = "Children";
-    children.Size = UDim2.new(1, 0, 1, -41);
+	-- scrolling frame
+	local children = Instance.new("ScrollingFrame");
+	children.Name = "Children";
+	children.Size = UDim2.new(1, 0, 1, -41);
 	children.Position = UDim2.fromOffset(0, 37);
 	children.BackgroundTransparency = 1;
 	children.BorderSizePixel = 0;
@@ -569,10 +592,10 @@ function library:CreateCategory(categorySettings)
 	children.CanvasSize = UDim2.new();
 	children.Parent = window;
 
-    -- divider
-    local divider = Instance.new("Frame");
-    divider.Name = "Divider";
-    divider.Size = UDim2.new(1, 0, 0, 1);
+	-- divider
+	local divider = Instance.new("Frame");
+	divider.Name = "Divider";
+	divider.Size = UDim2.new(1, 0, 0, 1);
 	divider.Position = UDim2.fromOffset(0, 37);
 	divider.BackgroundColor3 = Color3.new(1, 1, 1);
 	divider.BackgroundTransparency = 0.925;
@@ -580,51 +603,51 @@ function library:CreateCategory(categorySettings)
 	divider.Visible = false;
 	divider.Parent = window;
 
-    local windowList = Instance.new("UIListLayout");
-    windowList.SortOrder = Enum.SortOrder.LayoutOrder;
-    windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
-    windowList.Parent = children;
+	local windowList = Instance.new("UIListLayout");
+	windowList.SortOrder = Enum.SortOrder.LayoutOrder;
+	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+	windowList.Parent = children;
 
-    function categoryapi:Expand()
-        self.Expanded = not self.Expanded
+	function categoryapi:Expand()
+		self.Expanded = not self.Expanded
 
-        children.Visible = self.Expanded
-        arrow.Rotation = self.Expanded and 0 or 180;
-        window.Size = UDim2.fromOffset(220, self.Expanded and math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601) or 41);
-        divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
-    end
+		children.Visible = self.Expanded
+		arrow.Rotation = self.Expanded and 0 or 180;
+		window.Size = UDim2.fromOffset(220, self.Expanded and math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601) or 41);
+		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
+	end
 
-    -- arrow button
-    arrowButton.MouseButton1Click:Connect(function()
-        categoryapi:Expand()
-    end)
-    arrowButton.MouseButton2Click:Connect(function()
-        categoryapi:Expand()
-    end)
-    arrowButton.MouseEnter:Connect(function()
-        arrow.ImageColor3 = Color3.fromRGB(220, 220, 220)
-    end)
-    arrowButton.MouseLeave:Connect(function()
-        arrow.ImageColor3 = Color3.fromRGB(150, 150, 150)
-    end)
+	-- arrow button
+	arrowButton.MouseButton1Click:Connect(function()
+		categoryapi:Expand()
+	end)
+	arrowButton.MouseButton2Click:Connect(function()
+		categoryapi:Expand()
+	end)
+	arrowButton.MouseEnter:Connect(function()
+		arrow.ImageColor3 = Color3.fromRGB(220, 220, 220)
+	end)
+	arrowButton.MouseLeave:Connect(function()
+		arrow.ImageColor3 = Color3.fromRGB(150, 150, 150)
+	end)
 
-    -- children frame
-    children:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
-        if self.ThreadFix then
-            setthreadidentity(8)
-        end
-        divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
-    end)
+	-- children frame
+	children:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+		if self.ThreadFix then
+			setthreadidentity(8)
+		end
+		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
+	end)
 
-    -- window
-    window.InputBegan:Connect(function(inputObj)
-        if inputObj.Position.Y < window.AbsolutePosition.Y + 41 and inputObj.UserInputType == Enum.UserInputType.MouseButton2 then
+	-- window
+	window.InputBegan:Connect(function(inputObj)
+		if inputObj.Position.Y < window.AbsolutePosition.Y + 41 and inputObj.UserInputType == Enum.UserInputType.MouseButton2 then
 			categoryapi:Expand()
 		end
-    end)
+	end)
 
-    -- windowList
-    windowList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	-- windowList
+	windowList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		if self.ThreadFix then
 			setthreadidentity(8)
 		end
@@ -634,7 +657,7 @@ function library:CreateCategory(categorySettings)
 		end
 	end)
 
-    -- create button on main window
+	-- create button on main window
 	categoryapi.Button = self.Categories.Main:CreateButton({
 		Name = categorySettings.Name,
 		Icon = categorySettings.Icon,
@@ -648,55 +671,101 @@ function library:CreateCategory(categorySettings)
 	return categoryapi
 end
 
+-- mobile
+function library:CreateMobileButton()
+    local button = Instance.new("TextButton")
+	button.Size = UDim2.fromOffset(32, 32)
+	button.Position = UDim2.new(1, -90, 0, 4)
+	button.BackgroundColor3 = Color3.new()
+	button.BackgroundTransparency = 0.5
+	button.Text = ""
+	button.Parent = gui
+
+	local image = Instance.new("ImageLabel")
+	image.Size = UDim2.fromOffset(26, 26)
+	image.Position = UDim2.fromOffset(3, 3)
+	image.BackgroundTransparency = 1
+	image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png")
+	image.Parent = button
+	
+    local buttoncorner = Instance.new("UICorner")
+	buttoncorner.Parent = button
+	
+    self.BayaButton = button
+	
+    button.MouseButton1Click:Connect(function()
+	    if self.ThreadFix then
+			setthreadidentity(8)
+		end
+
+		clickFrame.Visible = not clickFrame.Visible
+		tooltip.Visible = false
+	end)
+end
+
 -- clean
 library:Clean(gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-    scale.Scale = math.max(gui.AbsoluteSize.X / 1920, 0.6);
+	scale.Scale = math.max(gui.AbsoluteSize.X / 1920, 0.6);
 end))
 library:Clean(scale:GetPropertyChangedSignal("Scale"):Connect(function()
-    scaledFrame.Size = UDim2.fromScale(1 / scale.Scale, 1 / scale.Scale);
-    -- reset scaling
-    for _, obj in scaledFrame:GetDescendants() do
-        if obj:IsA("GuiObject") and obj.Visible then
-            obj.Visible = false
-            obj.Visible = true
-        end
-    end
+	scaledFrame.Size = UDim2.fromScale(1 / scale.Scale, 1 / scale.Scale);
+	-- reset scaling
+	for _, obj in scaledFrame:GetDescendants() do
+		if obj:IsA("GuiObject") and obj.Visible then
+			obj.Visible = false
+			obj.Visible = true
+		end
+	end
 end))
 
 -- gui interaction
 library:Clean(inputService.InputBegan:Connect(function(inputObj)
-    if not inputService:GetFocusedTextBox() and inputObj.KeyCode ~= Enum.KeyCode.Unknown then
+	if not inputService:GetFocusedTextBox() and inputObj.KeyCode ~= Enum.KeyCode.Unknown then
 		table.insert(library.Keybinds.Held, inputObj.KeyCode.Name);
 
-        -- if gui interact keybind is pressed
-        if CheckKeybinds(library.Keybinds.Held, library.Keybinds.Interact, inputObj.KeyCode.Name) then
-            if library.ThreadFix then
-                setthreadidentity(8);
-            end
-            for _, window in library.Windows do
-                window.Visible = false;
-            end
+		-- if gui interact keybind is pressed
+		if CheckKeybinds(library.Keybinds.Held, library.Keybinds.Interact, inputObj.KeyCode.Name) then
+			if library.ThreadFix then
+				setthreadidentity(8);
+			end
 
-            clickFrame.Visible = not clickFrame.Visible
-            tooltip.Visible = false
-        end
-    end
+			clickFrame.Visible = not clickFrame.Visible
+			tooltip.Visible = false
+		end
+	end
 end))
 
 library:Clean(inputService.InputEnded:Connect(function(inputObj)
-    local index = table.find(library.Keybinds.Held, inputObj.KeyCode.Name)
-    if index then
-        table.remove(library.Keybinds.Held, index)
-    end
+	local index = table.find(library.Keybinds.Held, inputObj.KeyCode.Name)
+	if index then
+		table.remove(library.Keybinds.Held, index)
+	end
 end))
 
--- main gui
+-- main gui || Testing
+if inputService.TouchEnabled then
+    library:CreateMobileButton()
+end
+
 library:CreateGUI()
 
 library:CreateCategory({
-	Name = 'Action',
-	Icon = getcustomasset('Baya/UIAssets/ActionIcon.png'),
+	Name = "Action",
+	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
 	Size = UDim2.fromOffset(13, 14)
 })
+
+library:CreateCategory({
+	Name = "Test1",
+	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
+	Size = UDim2.fromOffset(13, 14)
+})
+
+library:CreateCategory({
+	Name = "Test2",
+	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
+	Size = UDim2.fromOffset(13, 14)
+})
+-- main gui || End
 
 return library
