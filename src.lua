@@ -70,7 +70,7 @@ end
 
 -- get asset
 getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
-	return DownloadFile(path, assetfunction)
+	return DownloadFile(path, assetFunction)
 end or function(path)
 	return assets[path] or ""
 end
