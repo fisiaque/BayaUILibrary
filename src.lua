@@ -693,6 +693,8 @@ function library:CreateMobileButton()
 	buttoncorner.Parent = button
 	
     self.BayaButton = button
+
+	Dragify(button)
 	
     button.MouseButton1Click:Connect(function()
 	    if self.ThreadFix then
