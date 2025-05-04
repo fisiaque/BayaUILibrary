@@ -68,6 +68,26 @@ local function GetTableSize(tab)
 	return ind
 end
 
+local function SetDownloadMessage(text)
+	if library.Loaded ~= true then
+		local loadingLabel = library.Downloader
+
+		if not loadingLabel then
+			loadingLabel = Instance.new("TextLabel")
+			loadingLabel.Size = UDim2.new(1, 0, 0, 40)
+			loadingLabel.BackgroundTransparency = 1
+			loadingLabel.TextStrokeTransparency = 0
+			loadingLabel.TextSize = 20
+			loadingLabel.TextColor3 = Color3.new(1, 1, 1)
+			loadingLabel.FontFace = theme.Font
+			loadingLabel.Parent = library.gui
+			library.Downloader = loadingLabel
+		end
+
+		loadingLabel.Text = "Downloading " .. text
+	end
+end
+
 -- get asset
 local function DownloadFile(path, func)
     if not isfile(path) then
@@ -214,26 +234,6 @@ local function Dragify(gui, window)
 			end)
         end
     end)
-end
-
-local function SetDownloadMessage(text)
-	if library.Loaded ~= true then
-		local loadingLabel = library.Downloader
-
-		if not loadingLabel then
-			loadingLabel = Instance.new("TextLabel")
-			loadingLabel.Size = UDim2.new(1, 0, 0, 40)
-			loadingLabel.BackgroundTransparency = 1
-			loadingLabel.TextStrokeTransparency = 0
-			loadingLabel.TextSize = 20
-			loadingLabel.TextColor3 = Color3.new(1, 1, 1)
-			loadingLabel.FontFace = theme.Font
-			loadingLabel.Parent = library.gui
-			library.Downloader = loadingLabel
-		end
-
-		loadingLabel.Text = "Downloading " .. text
-	end
 end
 
 -- generates a random string
