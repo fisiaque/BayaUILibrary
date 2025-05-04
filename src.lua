@@ -676,7 +676,7 @@ end
 function library:CreateMobileButton()
     local button = Instance.new("TextButton")
 	button.Size = UDim2.fromOffset(32, 32)
-	button.Position = UDim2.new(1, -40, .15, 4)
+	button.Position = UDim2.new(1, -90, 0, 4)
 	button.BackgroundColor3 = Color3.new()
 	button.BackgroundTransparency = 0.5
 	button.Text = ""
