@@ -9,7 +9,7 @@ local library = {
     Libraries = {};
     Keybinds = {
         Held = {};
-        Interact = {"KeypadPeriod"}
+        Interact = {"RightShift"}
     };
     Loaded = false;
     Place = game.PlaceId;
