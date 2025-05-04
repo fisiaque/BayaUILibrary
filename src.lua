@@ -81,6 +81,7 @@ local function SetDownloadMessage(text)
 			loadingLabel.TextColor3 = Color3.new(1, 1, 1)
 			loadingLabel.FontFace = theme.Font
 			loadingLabel.Parent = library.gui
+			
 			library.Downloader = loadingLabel
 		end
 
