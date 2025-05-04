@@ -69,22 +69,6 @@ local function GetTableSize(tab)
 end
 
 -- get asset
-getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
-	return DownloadFile(path, assetfunction)
-end or function(path)
-	return assets[path] or ""
-end
-
-local isfile = isfile or function(file)
-	local suc, res = pcall(function()
-		return readfile(file)
-	end)
-	return suc and res ~= nil and res ~= ""
-end
-local delfile = delfile or function(file)
-	writefile(file, "");
-end
-
 local function DownloadFile(path, func)
     if not isfile(path) then
         SetDownloadMessage(path)
@@ -105,6 +89,21 @@ local function DownloadFile(path, func)
     end
 
     return (func or readfile)(path)
+end
+local isfile = isfile or function(file)
+	local suc, res = pcall(function()
+		return readfile(file)
+	end)
+	return suc and res ~= nil and res ~= ""
+end
+local delfile = delfile or function(file)
+	writefile(file, "");
+end
+
+getcustomasset = not inputService.TouchEnabled and assetfunction and function(path)
+	return DownloadFile(path, assetfunction)
+end or function(path)
+	return assets[path] or ""
 end
 
 -- rearrange
