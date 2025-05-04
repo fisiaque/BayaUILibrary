@@ -39,6 +39,7 @@ local assets = {
     ["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
     ["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
     ["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
+	["Baya/UIAssets/PrayerIcon.png"] = "rbxassetid://112615257443345";
     ["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://120654586984889";
 }
 -- getcustomasset built in-function in exploit executors
@@ -757,13 +758,13 @@ library:CreateCategory({
 
 library:CreateCategory({
 	Name = "Test1",
-	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
+	Icon = getcustomasset("Baya/UIAssets/PrayerIcon.png"),
 	Size = UDim2.fromOffset(13, 14)
 })
 
 library:CreateCategory({
 	Name = "Test2",
-	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
+	Icon = getcustomasset("Baya/UIAssets/PrayerIcon.png"),
 	Size = UDim2.fromOffset(13, 14)
 })
 -- main gui || End

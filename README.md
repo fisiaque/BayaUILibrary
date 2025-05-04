@@ -2,7 +2,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./README/BayaLogo_White.png">
     <source media="(prefers-color-scheme: light)" srcset="./README/BayaLogo_Black.png">
-    <img alt="baya logo" src="./README/BayaLogo.png">
+    <img alt="Mr.Killip" src="./README/Killip.png">
   </picture>
 </p>
 <h2 align="center">
