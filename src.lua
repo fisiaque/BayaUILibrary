@@ -59,7 +59,7 @@ end
 local runService = cloneref(game:GetService("RunService"));
 local guiService = cloneref(game:GetService("GuiService"));
 local inputService = cloneref(game:GetService("UserInputService"));
-local tweenService = cloneref(game:GetService("TweenService"))
+local tweenService = cloneref(game:GetService("TweenService"));
 
 -- table
 local function GetTableSize(tab)
@@ -217,8 +217,11 @@ local function Dragify(gui, window)
                         dragPosition = (dragPosition // 3) * 3;
                         position = (position // 3) * 3;
                     end
-
-                    gui.Position = UDim2.fromOffset((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, (position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y);
+					
+					local x = math.clamp((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X)
+					local y = math.clamp((position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y)
+					
+					gui.Position = UDim2.fromOffset(x, y);
                 end
             end)
 
