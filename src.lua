@@ -567,7 +567,7 @@ function library:CreateCategory(categorySettings)
 	icon.Size = categorySettings.Size;
 	icon.Position = UDim2.fromOffset(12, (icon.Size.X.Offset > 20 and 14 or 13));
 	icon.BackgroundTransparency = 1;
-	icon.Image = categorySettings.Icon;
+	icon.Image = getcustomasset(categorySettings.Icon);
 	icon.ImageColor3 = theme.Text;
 	icon.Parent = window
 
