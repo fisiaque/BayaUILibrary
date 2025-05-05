@@ -451,7 +451,7 @@ function library:CreateGUI()
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = (getcustomasset(categorySettings.Icon) and "                                 " or "             ") .. categorySettings.Name;
+		button.Text = (categorySettings.Icon and "                                 " or "             ") .. categorySettings.Name;
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
@@ -467,7 +467,7 @@ function library:CreateGUI()
 			icon.Size = categorySettings.Size;
 			icon.Position = UDim2.fromOffset(13, 13);
 			icon.BackgroundTransparency = 1;
-			icon.Image = getcustomasset(categorySettings.Icon);
+			icon.Image = categorySettings.Icon;
 			icon.ImageColor3 = color.Darken(theme.Text, 0.15);
 			icon.Parent = button;
 		end
@@ -548,6 +548,9 @@ function library:CreateCategory(categorySettings)
 		Type = "Category";
 		Expanded = false
 	}
+
+	categorySettings.Icon = (categorySettings.Icon and getcustomasset(categorySettings.Icon)) or nil
+
 	-- create window category
 	local window = Instance.new("TextButton");
 	window.Name = categorySettings.Name .. "Category";
@@ -567,7 +570,7 @@ function library:CreateCategory(categorySettings)
 	icon.Size = categorySettings.Size;
 	icon.Position = UDim2.fromOffset(12, (icon.Size.X.Offset > 20 and 14 or 13));
 	icon.BackgroundTransparency = 1;
-	icon.Image = getcustomasset(categorySettings.Icon);
+	icon.Image = categorySettings.Icon;
 	icon.ImageColor3 = theme.Text;
 	icon.Parent = window
 
