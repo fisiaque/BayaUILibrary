@@ -31,6 +31,7 @@ local theme = {
     FontSemiBold = Font.fromEnum(Enum.Font.Arial, Enum.FontWeight.SemiBold);
 	Tween = TweenInfo.new(0.15, Enum.EasingStyle.Linear);
 };
+local draggableWindows = {};
 local tween = {
 	tweens = {};
 }
@@ -198,6 +199,8 @@ end
 
 -- make gui draggable
 local function Dragify(gui, window)
+	table.insert(draggableWindows, gui)
+
     gui.InputBegan:Connect(function(inputObj)
         if window and not window.Visible then return end -- window has to be visible
 
@@ -709,6 +712,15 @@ function library:CreateMobileButton()
 end
 
 -- clean
+library:Clean(workspaceService.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+	-- re-position draggable
+	for _, window in draggableWindows do
+		local x = math.clamp(window.Position.X.Offset, 0, (workspaceService.CurrentCamera.ViewportSize.X - window.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
+		local y = math.clamp(window.Position.Y.Offset, 0, (workspaceService.CurrentCamera.ViewportSize.Y - window.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
+					
+		window.Position = UDim2.fromOffset(x, y);
+	end
+end))
 library:Clean(gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 	scale.Scale = math.max(gui.AbsoluteSize.X / 1920, 0.6);
 end))
