@@ -199,7 +199,7 @@ end
 
 -- make gui draggable
 local function Dragify(gui, window)
-	table.insert(draggableWindows, gui)
+	draggableWindows[gui] = gui.Position -- stores old position of draggable window
 
     gui.InputBegan:Connect(function(inputObj)
         if window and not window.Visible then return end -- window has to be visible
@@ -232,6 +232,13 @@ local function Dragify(gui, window)
             local ended
 			ended = inputObj.Changed:Connect(function()
 				if inputObj.UserInputState == Enum.UserInputState.End then
+					if gui.Position ~= draggableWindows[gui] then -- if window has been moved then it won't toggle after moved
+						draggableWindows[gui] = gui.Position
+						gui.Active = false
+						task.delay(.25, function()
+							gui.Active = true
+						end)
+					end
 					if changed then
 						changed:Disconnect()
 					end
@@ -690,7 +697,6 @@ function library:CreateMobileButton()
 
     local button = Instance.new("TextButton")
 	button.Size = UDim2.fromOffset(32, 32)
-	--button.Position = UDim2.fromOffset(6, 60) -- UDim2.new(1, -90, 0, 4)
 	button.BackgroundColor3 = Color3.new()
 	button.BackgroundTransparency = 0.5
 	button.Text = ""
@@ -710,7 +716,7 @@ function library:CreateMobileButton()
 	
     self.BayaButton = button
 	
-    button.MouseButton1Click:Connect(function()
+    button.Activated:Connect(function()
 	    if self.ThreadFix then
 			setthreadidentity(8)
 		end
@@ -723,7 +729,7 @@ end
 -- clean
 library:Clean(workspaceService.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 	-- re-position draggable
-	for _, window in draggableWindows do
+	for window, _ in draggableWindows do
 		local x = math.clamp(window.Position.X.Offset, 0, (workspaceService.CurrentCamera.ViewportSize.X - window.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
 		local y = math.clamp(window.Position.Y.Offset, 0, (workspaceService.CurrentCamera.ViewportSize.Y - window.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
 					
