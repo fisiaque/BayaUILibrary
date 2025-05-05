@@ -60,6 +60,7 @@ local runService = cloneref(game:GetService("RunService"));
 local guiService = cloneref(game:GetService("GuiService"));
 local inputService = cloneref(game:GetService("UserInputService"));
 local tweenService = cloneref(game:GetService("TweenService"));
+local workspaceService = cloneref(game:GetService("Workspace"))
 
 -- table
 local function GetTableSize(tab)
@@ -218,8 +219,8 @@ local function Dragify(gui, window)
                         position = (position // 3) * 3;
                     end
 					
-					local x = math.clamp((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X)
-					local y = math.clamp((position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y)
+					local x = math.clamp((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, (workspaceService.CurrentCamera.ViewportSize.X - gui.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
+					local y = math.clamp((position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, (workspaceService.CurrentCamera.ViewportSize.Y - gui.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
 					
 					gui.Position = UDim2.fromOffset(x, y);
                 end
