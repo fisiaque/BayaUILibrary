@@ -451,7 +451,7 @@ function library:CreateGUI()
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = (categorySettings.Icon and "                                 " or "             ")..categorySettings.Name;
+		button.Text = (getcustomasset(categorySettings.Icon) and "                                 " or "             ") .. categorySettings.Name;
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
@@ -633,7 +633,9 @@ function library:CreateCategory(categorySettings)
 	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 	windowList.Parent = children;
 
-	function 
+	function categoryapi:CreateModule(modulesettings)
+
+	end
 
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded
@@ -749,6 +751,10 @@ function library:Load()
 			tooltip.Visible = false
 		end)
 	end
+end
+
+function library:Remove(obj)
+	local tab = self.Categories
 end
 
 -- clean
