@@ -11,8 +11,4 @@
    Catered for ME & YOU!
 </h2>
 
-## Usage (WIP)
-1. Run the following loadstring in Roblox: 
-```luau
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))()
-```
+
