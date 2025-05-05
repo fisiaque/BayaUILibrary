@@ -460,7 +460,7 @@ function library:CreateGUI()
 
 		-- create icon if being received
 		local icon
-
+		print(categorySettings.Icon)
 		if categorySettings.Icon then
 			icon = Instance.new("ImageLabel");
 			icon.Name = "Icon";
@@ -549,7 +549,8 @@ function library:CreateCategory(categorySettings)
 		Expanded = false
 	}
 
-	categorySettings.Icon = (categorySettings.Icon and getcustomasset(categorySettings.Icon)) or nil
+	-- get icon asset
+	categorySettings.Icon = getcustomasset(categorySettings.Icon)
 
 	-- create window category
 	local window = Instance.new("TextButton");
