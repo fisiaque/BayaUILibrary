@@ -8,7 +8,7 @@
 <h2 align="center">
   A Roblox UI Library
   <br/>
-   Catered for ME & YOU!
+   Catered for ME!
 </h2>
 
 
