@@ -467,7 +467,7 @@ function library:CreateGUI()
 			icon.Size = categorySettings.Size;
 			icon.Position = UDim2.fromOffset(13, 13);
 			icon.BackgroundTransparency = 1;
-			icon.Image = categorySettings.Icon;
+			icon.Image = getcustomasset(categorySettings.Icon);
 			icon.ImageColor3 = color.Darken(theme.Text, 0.15);
 			icon.Parent = button;
 		end
@@ -632,6 +632,8 @@ function library:CreateCategory(categorySettings)
 	windowList.SortOrder = Enum.SortOrder.LayoutOrder;
 	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 	windowList.Parent = children;
+
+	function 
 
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded
