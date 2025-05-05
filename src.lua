@@ -696,46 +696,57 @@ function library:CreateCategory(categorySettings)
 	return categoryapi
 end
 
--- mobile
-function library:CreateMobileButton()
-	-- create click gui
-	local mobileFrame = Instance.new("Frame");
-	mobileFrame.Name = "MobileFrame";
-	mobileFrame.Size = UDim2.fromScale(1, 1); 
-	mobileFrame.BackgroundTransparency = 1;
-	mobileFrame.Parent = scaledFrame
+function library:Load()
+	local saveCheck = true
 
-    local button = Instance.new("TextButton")
-	button.Size = UDim2.fromOffset(32, 32)
-	button.BackgroundColor3 = Color3.new()
-	button.BackgroundTransparency = 0.5
-	button.Text = ""
-	button.Parent = mobileFrame
+	-- if downloader exists | delete
+	if self.Downloader then
+		self.Downloader:Destroy()
+		self.Downloader = nil
+	end
 
-	Dragify(button)
+	self.Loaded = savecheck
 
-	local image = Instance.new("ImageLabel")
-	image.Size = UDim2.fromOffset(26, 26)
-	image.Position = UDim2.fromOffset(3, 3)
-	image.BackgroundTransparency = 1
-	image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png")
-	image.Parent = button
-	
-    local buttoncorner = Instance.new("UICorner")
-	buttoncorner.Parent = button
-	
-    self.BayaButton = button
-	
-    button.MouseButton1Click:Connect(function()
-		if library.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
+	if inputService.TouchEnabled then -- mobile
+		-- create click gui
+		local mobileFrame = Instance.new("Frame");
+		mobileFrame.Name = "MobileFrame";
+		mobileFrame.Size = UDim2.fromScale(1, 1); 
+		mobileFrame.BackgroundTransparency = 1;
+		mobileFrame.Parent = scaledFrame
 
-	    if self.ThreadFix then
-			setthreadidentity(8)
-		end
+		local button = Instance.new("TextButton")
+		button.Size = UDim2.fromOffset(32, 32)
+		button.BackgroundColor3 = Color3.new()
+		button.BackgroundTransparency = 0.5
+		button.Text = ""
+		button.Parent = mobileFrame
 
-		clickFrame.Visible = not clickFrame.Visible
-		tooltip.Visible = false
-	end)
+		Dragify(button)
+
+		local image = Instance.new("ImageLabel")
+		image.Size = UDim2.fromOffset(26, 26)
+		image.Position = UDim2.fromOffset(3, 3)
+		image.BackgroundTransparency = 1
+		image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png")
+		image.Parent = button
+		
+		local buttoncorner = Instance.new("UICorner")
+		buttoncorner.Parent = button
+		
+		self.BayaButton = button
+		
+		button.MouseButton1Click:Connect(function()
+			if library.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
+
+			if self.ThreadFix then
+				setthreadidentity(8)
+			end
+
+			clickFrame.Visible = not clickFrame.Visible
+			tooltip.Visible = false
+		end)
+	end
 end
 
 -- clean
@@ -785,31 +796,5 @@ library:Clean(inputService.InputEnded:Connect(function(inputObj)
 		table.remove(library.Keybinds.Held, index)
 	end
 end))
-
--- main gui || Testing
-if inputService.TouchEnabled then
-    library:CreateMobileButton()
-end
-
-library:CreateGUI()
-
-library:CreateCategory({
-	Name = "Action",
-	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
-	Size = UDim2.fromOffset(13, 14)
-})
-
-library:CreateCategory({
-	Name = "Test1",
-	Icon = getcustomasset("Baya/UIAssets/PrayerIcon.png"),
-	Size = UDim2.fromOffset(13, 14)
-})
-
-library:CreateCategory({
-	Name = "Test2",
-	Icon = getcustomasset("Baya/UIAssets/PrayerIcon.png"),
-	Size = UDim2.fromOffset(13, 14)
-})
--- main gui || End
 
 return library
