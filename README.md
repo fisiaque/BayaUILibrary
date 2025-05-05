@@ -14,5 +14,5 @@
 ## Usage (WIP)
 1. Run the following loadstring in Roblox: 
 ```luau
-loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))()
 ```
