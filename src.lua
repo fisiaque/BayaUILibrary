@@ -681,13 +681,22 @@ end
 
 -- mobile
 function library:CreateMobileButton()
+	-- create click gui
+	local mobileFrame = Instance.new("Frame");
+	mobileFrame.Name = "MobileFrame";
+	mobileFrame.Size = UDim2.fromScale(1, 1); 
+	mobileFrame.BackgroundTransparency = 1;
+	mobileFrame.Parent = scaledFrame
+
     local button = Instance.new("TextButton")
 	button.Size = UDim2.fromOffset(32, 32)
-	button.Position = UDim2.new(1, -90, 0, 4)
+	--button.Position = UDim2.fromOffset(6, 60) -- UDim2.new(1, -90, 0, 4)
 	button.BackgroundColor3 = Color3.new()
 	button.BackgroundTransparency = 0.5
 	button.Text = ""
-	button.Parent = gui
+	button.Parent = mobileFrame
+
+	Dragify(button)
 
 	local image = Instance.new("ImageLabel")
 	image.Size = UDim2.fromOffset(26, 26)
