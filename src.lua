@@ -5,6 +5,9 @@
 --  \/_____/   \/_/\/_/   \/_____/   \/_/\/_/      \/_____/   \/_/      \/_____/   \/_/   \/_____/   \/_/ /_/   \/_/\/_/   \/_/ /_/   \/_____/ 
                                                                                                                                                                                                                          
 local library = {
+	Windows = {
+		Draggable = {};
+	};
     Categories = {};
     Libraries = {};
     Keybinds = {
@@ -31,7 +34,6 @@ local theme = {
     FontSemiBold = Font.fromEnum(Enum.Font.Arial, Enum.FontWeight.SemiBold);
 	Tween = TweenInfo.new(0.15, Enum.EasingStyle.Linear);
 };
-local draggableWindows = {};
 local tween = {
 	tweens = {};
 }
@@ -199,7 +201,10 @@ end
 
 -- make gui draggable
 local function Dragify(gui, window)
-	draggableWindows[gui] = gui.Position -- stores old position of draggable window
+	library.Windows.Draggable[gui] = {
+		Position = gui.Position;
+		CanClick = true
+	}
 
     gui.InputBegan:Connect(function(inputObj)
         if window and not window.Visible then return end -- window has to be visible
@@ -214,8 +219,10 @@ local function Dragify(gui, window)
 			) / library.gui.ScaledFrame.UIScale.Scale
 
             local changed = inputService.InputChanged:Connect(function(input)
-				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) then
-                    local position = input.Position;
+				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not library.Windows.Dragging or library.Windows.Dragging == gui) then
+					library.Windows.Dragging = gui -- prevents more than 1 window from 'stack' dragging
+					
+					local position = input.Position;
                     -- snap to grid if left shift held
                     if inputService:IsKeyDown(Enum.KeyCode.LeftShift) then
                         dragPosition = (dragPosition // 3) * 3;
@@ -232,11 +239,14 @@ local function Dragify(gui, window)
             local ended
 			ended = inputObj.Changed:Connect(function()
 				if inputObj.UserInputState == Enum.UserInputState.End then
-					if gui.Position ~= draggableWindows[gui] then -- if window has been moved then it won't toggle after moved
-						draggableWindows[gui] = gui.Position
-						gui.Active = false
+					if gui.Position ~= library.Windows.Draggable[gui].Position then -- if window has been moved then it won't toggle after moved
+						library.Windows.Dragging = nil
+
+						library.Windows.Draggable[gui].Position = gui.Position
+						library.Windows.Draggable[gui].CanClick = false
+
 						task.delay(.25, function()
-							gui.Active = true
+							library.Windows.Draggable[gui].CanClick = true
 						end)
 					end
 					if changed then
@@ -716,7 +726,9 @@ function library:CreateMobileButton()
 	
     self.BayaButton = button
 	
-    button.Activated:Connect(function()
+    button.MouseButton1Click:Connect(function()
+		if library.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
+
 	    if self.ThreadFix then
 			setthreadidentity(8)
 		end
@@ -729,7 +741,7 @@ end
 -- clean
 library:Clean(workspaceService.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 	-- re-position draggable
-	for window, _ in draggableWindows do
+	for window, _ in library.Windows.Draggable do
 		local x = math.clamp(window.Position.X.Offset, 0, (workspaceService.CurrentCamera.ViewportSize.X - window.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
 		local y = math.clamp(window.Position.Y.Offset, 0, (workspaceService.CurrentCamera.ViewportSize.Y - window.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
 					
