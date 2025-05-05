@@ -460,7 +460,7 @@ function library:CreateGUI()
 
 		-- create icon if being received
 		local icon
-		print(categorySettings.Icon)
+
 		if categorySettings.Icon then
 			icon = Instance.new("ImageLabel");
 			icon.Name = "Icon";
