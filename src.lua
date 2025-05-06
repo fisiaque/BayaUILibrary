@@ -804,7 +804,7 @@ function library:Load()
 			tooltip.Visible = false;
 		end)
 
-		library:CreateNotification("Baya Loaded", "Press button to toggle!", 5);
+		library:CreateNotification("Baya UI Loaded", "Press button to toggle!", 5);
 
 		if tween.Tween then
 			local tweenInfo = TweenInfo.new(
@@ -823,7 +823,7 @@ function library:Load()
 	else
 		local concattedKeybinds = table.concat(self.Keybinds.Interact, ", ")
 
-		library:CreateNotification("Baya Loaded", "Press " .. concattedKeybinds .. " to toggle!", 5)
+		library:CreateNotification("Baya UI Loaded", "Press " .. concattedKeybinds .. " to toggle!", 5)
 	end
 end
 
