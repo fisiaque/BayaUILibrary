@@ -845,7 +845,7 @@ function library:CreateNotification(title, text, duration, type)
 		iconShadow.Position = UDim2.fromOffset(-5, -8);
 		iconShadow.ZIndex = 5;
 		iconShadow.BackgroundTransparency = 1;
-		iconShadow.Image = getcustomasset("Baya/UIAssets/"..(type or "Info")..".png");
+		iconShadow.Image = getcustomasset("Baya/UIAssets/" .. (type or "Info") .. ".png");
 		iconShadow.ImageColor3 = Color3.new();
 		iconShadow.ImageTransparency = 0.5;
 		iconShadow.Parent = notification;
@@ -967,7 +967,6 @@ function library:Uninject()
 	if library.ThreadFix then
 		setthreadidentity(8)
 		clickFrame.Visible = false
-		library:BlurCheck()
 	end
 
 	library.gui:ClearAllChildren()
