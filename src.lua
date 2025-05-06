@@ -717,12 +717,10 @@ if inputService.TouchEnabled then -- mobile
     local buttoncorner = Instance.new("UICorner");
     buttoncorner.Parent = button;
     
-    self.BayaButton = button;
+    library.BayaButton = button;
     
     button.MouseButton1Click:Connect(function()
-        if library.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
-
-        if self.ThreadFix then
+        if library.ThreadFix then
             setthreadidentity(8);
         end
 
