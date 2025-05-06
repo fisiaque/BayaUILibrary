@@ -36,10 +36,16 @@ local tween = {
 	tweens = {};
 }
 local assets = { 
+	["Baya/UIAssets/Warning.png"] = "rbxassetid://125144969372589";
+	["Baya/UIAssets/Alert.png"] = "rbxassetid://102812705220441";
+	["Baya/UIAssets/Info.png"] = "rbxassetid://105237774908134";
+	["Baya/UIAssets/Notification.png"] = "rbxassetid://115871497200510";
     ["Baya/UIAssets/GUILogo.png"] = "rbxassetid://89243102639787";
     ["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
     ["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
     ["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
+	["Baya/UIAssets/PrayerIcon.png"] = "rbxassetid://112615257443345";
+    ["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://120654586984889";
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
