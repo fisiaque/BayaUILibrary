@@ -489,9 +489,6 @@ function library:CreateGUI()
 			Index = GetTableSize(categoryapi.Buttons);
 			Settings = categorySettings;
 		}
-		print("SPACE:" .. "             " .. ": SPACE")
-		print("SPACE:" .. "                                 " .. ": SPACE")
-		print((categorySettings.Icon and true or false))
 
 		-- create main window button
 		local button = Instance.new("TextButton");
