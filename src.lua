@@ -497,7 +497,7 @@ function library:CreateGUI()
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = (categorySettings.Icon and '                                 ' or '             ')..categorySettings.Name
+		button.Text = (categorySettings.Icon and "          " or "   " ) .. categorySettings.Name
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
@@ -1027,22 +1027,5 @@ library:Clean(inputService.InputEnded:Connect(function(inputObj)
 		table.remove(library.Keybinds.Held, index)
 	end
 end))
-
--- debug
-library:CreateGUI();
-
--- testing started
-library:CreateCategory({
-	Name = "Test1",
-	Icon = "Baya/UIAssets/PrayerIcon.png",
-	Size = UDim2.fromOffset(13, 14)
-});
-
-library:CreateCategory({
-	Name = "Test2",
-	Icon = "Baya/UIAssets/PrayerIcon.png",
-	Size = UDim2.fromOffset(13, 14)
-});
--- testing finished
 
 return library
