@@ -5,9 +5,6 @@
 --  \/_____/   \/_/\/_/   \/_____/   \/_/\/_/      \/_____/   \/_/      \/_____/   \/_/   \/_____/   \/_/ /_/   \/_/\/_/   \/_/ /_/   \/_____/ 
                                                                                                                                                                                                                          
 local library = {
-	Windows = {
-		Draggable = {};
-	};
     Categories = {};
     Libraries = {};
     Keybinds = {
@@ -36,13 +33,8 @@ local theme = {
 };
 local tween = {
 	tweens = {};
-	tweenstwo = {};
 }
 local assets = { 
-	["Baya/UIAssets/Warning.png"] = "rbxassetid://125144969372589";
-	["Baya/UIAssets/Alert.png"] = "rbxassetid://102812705220441";
-	["Baya/UIAssets/Info.png"] = "rbxassetid://105237774908134";
-	["Baya/UIAssets/Notification.png"] = "rbxassetid://115871497200510";
     ["Baya/UIAssets/GUILogo.png"] = "rbxassetid://89243102639787";
     ["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
     ["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
@@ -58,10 +50,6 @@ local marked = "--MARKED: DELETE IF CACHED INCASE BAYA UPDATES.\n"
 -- category previous position for window
 local pp = UDim2.fromOffset(236, 60)
 
--- fontsize
-local fontsize = Instance.new('GetTextBoundsParams')
-fontsize.Width = math.huge
-
 -- creates a safe reference to a roblox instance object if executor doesn"t already have on pre-built
 local cloneref = cloneref or function(obj)
     return obj
@@ -71,40 +59,13 @@ end
 local runService = cloneref(game:GetService("RunService"));
 local guiService = cloneref(game:GetService("GuiService"));
 local inputService = cloneref(game:GetService("UserInputService"));
-local tweenService = cloneref(game:GetService("TweenService"));
-local textService = cloneref(game:GetService("TextService"))
+local tweenService = cloneref(game:GetService("TweenService"))
 
 -- table
 local function GetTableSize(tab)
 	local ind = 0
 	for _ in tab do ind += 1 end
 	return ind
-end
-
-local function LoopClean(tab)
-	for i, v in tab do
-		if type(v) == "table" then
-			LoopClean(v)
-		end
-		tab[i] = nil
-	end
-end
-
-local function RemoveTags(str)
-	str = str:gsub('<br%s*/>', '\n')
-	return str:gsub('<[^<>]->', '')
-end
-
-
-local getfontsize = function(text, size, font)
-	fontsize.Text = text
-	fontsize.Size = size
-
-	if typeof(font) == 'Font' then
-		fontsize.Font = font
-	end
-
-	return textService:GetTextBoundsAsync(fontsize)
 end
 
 local function SetDownloadMessage(text)
@@ -204,13 +165,10 @@ end
 local function WipeFolder(path)
     -- check path
     if not isfolder(path) then return end
-	
-	local string = string.gsub(marked, "\n", "")
 
     for _, file in listfiles(path) do
-		local search = select(1, readfile(file):find(string))
-
-        if isfile(file) and search == 1 then
+        if isfile(file) and select(1, readfile(file):find(marked)) == 1 then
+            print("Deleting")
             delfile(file)
         end
     end
@@ -239,11 +197,6 @@ end
 
 -- make gui draggable
 local function Dragify(gui, window)
-	library.Windows.Draggable[gui] = {
-		Position = gui.Position;
-		CanClick = true
-	}
-
     gui.InputBegan:Connect(function(inputObj)
         if window and not window.Visible then return end -- window has to be visible
 
@@ -257,36 +210,21 @@ local function Dragify(gui, window)
 			) / library.gui.ScaledFrame.UIScale.Scale
 
             local changed = inputService.InputChanged:Connect(function(input)
-				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not library.Windows.Dragging or library.Windows.Dragging == gui) then
-					library.Windows.Dragging = gui -- prevents more than 1 window from "stack" dragging
-					
-					local position = input.Position;
+				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) then
+                    local position = input.Position;
                     -- snap to grid if left shift held
                     if inputService:IsKeyDown(Enum.KeyCode.LeftShift) then
                         dragPosition = (dragPosition // 3) * 3;
                         position = (position // 3) * 3;
                     end
-					
-					local x = math.clamp((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
-					local y = math.clamp((position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
-					
-					gui.Position = UDim2.fromOffset(x, y);
+
+                    gui.Position = UDim2.fromOffset((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, (position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y);
                 end
             end)
 
             local ended
 			ended = inputObj.Changed:Connect(function()
 				if inputObj.UserInputState == Enum.UserInputState.End then
-					if gui.Position ~= library.Windows.Draggable[gui].Position then -- if window has been moved then it won"t toggle after moved
-						library.Windows.Dragging = nil
-
-						library.Windows.Draggable[gui].Position = gui.Position
-						library.Windows.Draggable[gui].CanClick = false
-
-						task.delay(.25, function()
-							library.Windows.Draggable[gui].CanClick = true
-						end)
-					end
 					if changed then
 						changed:Disconnect()
 					end
@@ -413,14 +351,6 @@ local scale = Instance.new("UIScale");
 scale.Scale = math.max(gui.AbsoluteSize.X / 1920, 0.6);
 scale.Parent = scaledFrame;
 
--- resize scaledFrame
-scaledFrame.Size = UDim2.fromScale(1 / scale.Scale, 1 / scale.Scale)
-
--- create Notifications folder
-notifications = Instance.new("Folder")
-notifications.Name = "Notifications"
-notifications.Parent = scaledFrame
-
 -- create click gui
 local clickFrame = Instance.new("Frame");
 clickFrame.Name = "ClickFrame";
@@ -497,7 +427,7 @@ function library:CreateGUI()
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = (categorySettings.Icon and "                                 " or "             ") .. categorySettings.Name
+		button.Text = (categorySettings.Icon and "                                 " or "             ")..categorySettings.Name;
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
@@ -594,11 +524,6 @@ function library:CreateCategory(categorySettings)
 		Type = "Category";
 		Expanded = false
 	}
-
-	-- get icon asset
-	local getIcon = getcustomasset(categorySettings.Icon)
-	categorySettings.Icon = getIcon
-
 	-- create window category
 	local window = Instance.new("TextButton");
 	window.Name = categorySettings.Name .. "Category";
@@ -727,9 +652,7 @@ function library:CreateCategory(categorySettings)
 		if self.ThreadFix then
 			setthreadidentity(8)
 		end
-
 		children.CanvasSize = UDim2.fromOffset(0, windowList.AbsoluteContentSize.Y / scale.Scale)
-		
 		if categoryapi.Expanded then
 			window.Size = UDim2.fromOffset(220, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601))
 		end
@@ -749,236 +672,36 @@ function library:CreateCategory(categorySettings)
 	return categoryapi
 end
 
-function library:Load()
-	local saveCheck = true
+-- mobile
+function library:CreateMobileButton()
+    local button = Instance.new("TextButton")
+	button.Size = UDim2.fromOffset(32, 32)
+	button.Position = UDim2.new(1, -90, 0, 4)
+	button.BackgroundColor3 = Color3.new()
+	button.BackgroundTransparency = 0.5
+	button.Text = ""
+	button.Parent = gui
 
-	-- if downloader exists | delete
-	if self.Downloader then
-		self.Downloader:Destroy()
-		self.Downloader = nil
-	end
-
-	self.Loaded = saveCheck
-
-	if inputService.TouchEnabled then -- mobile
-		-- create click gui
-		local mobileFrame = Instance.new("Frame");
-		mobileFrame.Name = "MobileFrame";
-		mobileFrame.Size = UDim2.fromScale(1, 1); 
-		mobileFrame.BackgroundTransparency = 1;
-		mobileFrame.Parent = scaledFrame
-
-		local button = Instance.new("TextButton");
-		button.Size = UDim2.fromOffset(32, 32);
-		button.BackgroundColor3 = Color3.new();
-		button.BackgroundTransparency = 0.5;
-		button.Text = "";
-		button.Parent = mobileFrame;
-
-		Dragify(button);
-
-		local image = Instance.new("ImageLabel");
-		image.Size = UDim2.fromOffset(26, 26);
-		image.Position = UDim2.fromOffset(3, 3);
-		image.BackgroundTransparency = 1
-		image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png");
-		image.Parent = button;
-		
-		local buttoncorner = Instance.new("UICorner");
-		buttoncorner.Parent = button;
-		
-		self.BayaButton = button;
-		
-		button.MouseButton1Click:Connect(function()
-			if library.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
-
-			if self.ThreadFix then
-				setthreadidentity(8);
-			end
-
-			clickFrame.Visible = not clickFrame.Visible;
-			tooltip.Visible = false;
-		end)
-
-		library:CreateNotification("Baya UI Loaded", "Press button to toggle!", 5);
-
-		if tween.Tween then
-			local tweenInfo = TweenInfo.new(
-				.5, -- time in seconds for tween
-				Enum.EasingStyle.Sine, -- tweening style
-				Enum.EasingDirection.Out, -- tweening direction
-				5, -- times to repeat (when less than zero the tween will loop indefinitely)
-				true, -- reverse?
-				0 -- delay time
-			);
-
-			tween:Tween(button, tweenInfo, {
-				BackgroundColor3 = Color3.new(1, 1, 1)
-			});
-		end
-	else
-		local concattedKeybinds = table.concat(self.Keybinds.Interact, ", ")
-
-		library:CreateNotification("Baya UI Loaded", "Press " .. concattedKeybinds .. " to toggle!", 5)
-	end
-end
-
-function library:CreateNotification(title, text, duration, type)
-	task.delay(0, function()
-		if self.ThreadFix then
-			setthreadidentity(8);
-		end
-
-		local i = #notifications:GetChildren() + 1;
-
-		local notification = Instance.new("ImageLabel");
-		notification.Size = UDim2.fromOffset(math.max(getfontsize(RemoveTags(text), 14, theme.Font).X + 80, 266), 75);
-		notification.Position = UDim2.new(1, 0, 1, -(29 + (78 * i)));
-		notification.ZIndex = 5;
-		notification.BackgroundTransparency = 1;
-		notification.Image = getcustomasset("Baya/UIAssets/Notification.png");
-		notification.ScaleType = Enum.ScaleType.Slice;
-		notification.SliceCenter = Rect.new(7, 7, 9, 9);
-		notification.Parent = notifications;
-
-		local iconShadow = Instance.new("ImageLabel");
-		iconShadow.Name = "Icon";
-		iconShadow.Size = UDim2.fromOffset(60, 60);
-		iconShadow.Position = UDim2.fromOffset(-5, -8);
-		iconShadow.ZIndex = 5;
-		iconShadow.BackgroundTransparency = 1;
-		iconShadow.Image = getcustomasset("Baya/UIAssets/" .. (type or "Info") .. ".png");
-		iconShadow.ImageColor3 = Color3.new();
-		iconShadow.ImageTransparency = 0.5;
-		iconShadow.Parent = notification;
-
-		local icon = iconShadow:Clone();
-		icon.Position = UDim2.fromOffset(-1, -1);
-		icon.ImageColor3 = Color3.new(1, 1, 1);
-		icon.ImageTransparency = 0;
-		icon.Parent = iconShadow;
-
-		local titleLabel = Instance.new("TextLabel");
-		titleLabel.Name = "Title";
-		titleLabel.Size = UDim2.new(1, -56, 0, 20);
-		titleLabel.Position = UDim2.fromOffset(46, 16);
-		titleLabel.ZIndex = 5;
-		titleLabel.BackgroundTransparency = 1;
-		titleLabel.Text = "<stroke color='#FFFFFF' joins='round' thickness='0.3' transparency='0.5'>"..title..'</stroke>'
-		titleLabel.TextXAlignment = Enum.TextXAlignment.Left;
-		titleLabel.TextYAlignment = Enum.TextYAlignment.Top;
-		titleLabel.TextColor3 = Color3.fromRGB(209, 209, 209);
-		titleLabel.TextSize = 14;
-		titleLabel.RichText = true;
-		titleLabel.FontFace = theme.FontSemiBold;
-		titleLabel.Parent = notification;
-
-		local textShadow = titleLabel:Clone();
-		textShadow.Name = "Text";
-		textShadow.Position = UDim2.fromOffset(47, 44);
-		textShadow.Text = RemoveTags(text);
-		textShadow.TextColor3 = Color3.new();
-		textShadow.TextTransparency = 0.5;
-		textShadow.RichText = false;
-		textShadow.FontFace = theme.Font;
-		textShadow.Parent = notification;
-
-		local textLabel = textShadow:Clone();
-		textLabel.Position = UDim2.fromOffset(-1, -1);
-		textLabel.Text = text;
-		textLabel.TextColor3 = Color3.fromRGB(170, 170, 170);
-		textLabel.TextTransparency = 0;
-		textLabel.RichText = true;
-		textLabel.Parent = textShadow;
-
-		local progress = Instance.new("Frame");
-		progress.Name = "Progress";
-		progress.Size = UDim2.new(1, -13, 0, 2);
-		progress.Position = UDim2.new(0, 3, 1, -4);
-		progress.ZIndex = 5;
-		progress.BackgroundColor3 =
-			type == "Alert" and Color3.fromRGB(250, 50, 56)
-			or type == "Warning" and Color3.fromRGB(236, 129, 43)
-			or Color3.fromRGB(220, 220, 220);
-		progress.BorderSizePixel = 0;
-		progress.Parent = notification;
-
-		if tween.Tween then
-			tween:Tween(notification, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
-				AnchorPoint = Vector2.new(1, 0)
-			}, tween.tweenstwo);
-			tween:Tween(progress, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-				Size = UDim2.fromOffset(0, 2)
-			});
-		end
-
-		task.delay(duration, function()
-			if tween.Tween then
-				tween:Tween(notification, TweenInfo.new(0.4, Enum.EasingStyle.Exponential), {
-					AnchorPoint = Vector2.new(0, 0)
-				}, tween.tweenstwo);
-			end
-
-			task.wait(0.2)
-
-			notification:ClearAllChildren()
-			notification:Destroy()
-		end)
-	end)
-end
-
-function library:Remove(obj)
-	local tab = self.Categories
-
-	if tab and tab[obj] then
-		local newobj = tab[obj]
-
-		if self.ThreadFix then
+	local image = Instance.new("ImageLabel")
+	image.Size = UDim2.fromOffset(26, 26)
+	image.Position = UDim2.fromOffset(3, 3)
+	image.BackgroundTransparency = 1
+	image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png")
+	image.Parent = button
+	
+    local buttoncorner = Instance.new("UICorner")
+	buttoncorner.Parent = button
+	
+    self.BayaButton = button
+	
+    button.MouseButton1Click:Connect(function()
+	    if self.ThreadFix then
 			setthreadidentity(8)
 		end
 
-		for _, v in {"Object", "Children", "Toggle", "Button"} do
-			local childobj = typeof(newobj[v]) == "table" and newobj[v].Object or newobj[v]
-			if typeof(childobj) == "Instance" then
-				childobj:Destroy()
-				childobj:ClearAllChildren()
-			end
-		end
-
-		LoopClean(newobj)
-
-		tab[obj] = nil
-	end
-end
-
-function library:Uninject()
-	library.Loaded = nil
-
-	for _, v in self.Categories do
-		if v.Type == "Overlay" and v.Button.Enabled then
-			v.Button:Toggle()
-		end
-	end
-
-	for _, v in library.Connections do
-		pcall(function()
-			v:Disconnect()
-		end)
-	end
-
-	if library.ThreadFix then
-		setthreadidentity(8)
-		clickFrame.Visible = false
-	end
-
-	library.gui:ClearAllChildren()
-	library.gui:Destroy()
-
-	table.clear(library.Libraries)
-
-	LoopClean(library)
-
-	shared.library = nil
+		clickFrame.Visible = not clickFrame.Visible
+		tooltip.Visible = false
+	end)
 end
 
 -- clean
@@ -993,13 +716,6 @@ library:Clean(scale:GetPropertyChangedSignal("Scale"):Connect(function()
 			obj.Visible = false
 			obj.Visible = true
 		end
-	end
-	-- re-position draggable
-	for window, _ in library.Windows.Draggable do
-		local x = math.clamp(window.Position.X.Offset, 0, (window.Parent.AbsoluteSize.X - window.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
-		local y = math.clamp(window.Position.Y.Offset, 0, (window.Parent.AbsoluteSize.Y - window.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
-					
-		window.Position = UDim2.fromOffset(x, y);
 	end
 end))
 
@@ -1026,5 +742,31 @@ library:Clean(inputService.InputEnded:Connect(function(inputObj)
 		table.remove(library.Keybinds.Held, index)
 	end
 end))
+
+-- main gui || Testing
+if inputService.TouchEnabled then
+    library:CreateMobileButton()
+end
+
+library:CreateGUI()
+
+library:CreateCategory({
+	Name = "Action",
+	Icon = getcustomasset("Baya/UIAssets/ActionIcon.png"),
+	Size = UDim2.fromOffset(13, 14)
+})
+
+library:CreateCategory({
+	Name = "Test1",
+	Icon = getcustomasset("Baya/UIAssets/PrayerIcon.png"),
+	Size = UDim2.fromOffset(13, 14)
+})
+
+library:CreateCategory({
+	Name = "Test2",
+	Icon = getcustomasset("Baya/UIAssets/PrayerIcon.png"),
+	Size = UDim2.fromOffset(13, 14)
+})
+-- main gui || End
 
 return library
