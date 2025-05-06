@@ -489,6 +489,9 @@ function library:CreateGUI()
 			Index = GetTableSize(categoryapi.Buttons);
 			Settings = categorySettings;
 		}
+		print("             ")
+		print("                                 ")
+		print((categorySettings.Icon and "                                 " or "             "))
 
 		-- create main window button
 		local button = Instance.new("TextButton");
