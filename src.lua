@@ -497,7 +497,7 @@ function library:CreateGUI()
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = (categorySettings.Icon and "                                 " or "             ") .. categorySettings.Name;
+		button.Text = (categorySettings.Icon and '                                 ' or '             ')..categorySettings.Name
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
