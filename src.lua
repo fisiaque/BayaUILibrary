@@ -1028,4 +1028,21 @@ library:Clean(inputService.InputEnded:Connect(function(inputObj)
 	end
 end))
 
+-- debug
+library:CreateGUI();
+
+-- testing started
+library:CreateCategory({
+	Name = "Test1",
+	Icon = "Baya/UIAssets/PrayerIcon.png",
+	Size = UDim2.fromOffset(13, 14)
+});
+
+library:CreateCategory({
+	Name = "Test2",
+	Icon = "Baya/UIAssets/PrayerIcon.png",
+	Size = UDim2.fromOffset(13, 14)
+});
+-- testing finished
+
 return library
