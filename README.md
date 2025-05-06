@@ -11,4 +11,6 @@
    Catered for ME!
 </h2>
 
-
+```luau
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))();
+```
