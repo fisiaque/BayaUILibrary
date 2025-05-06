@@ -204,10 +204,13 @@ end
 local function WipeFolder(path)
     -- check path
     if not isfolder(path) then return end
+	
+	local string = string.gsub(marked, "\n", "")
 
     for _, file in listfiles(path) do
-        if isfile(file) and select(1, readfile(file):find(marked)) == 1 then
-            print("Deleting")
+		local search = select(1, readfile(file):find(string))
+
+        if isfile(file) and search == 1 then
             delfile(file)
         end
     end
