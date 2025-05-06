@@ -501,7 +501,7 @@ function library:CreateGUI()
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
 		button.Text = (categorySettings.Icon and "                                 " or "             ") .. categorySettings.Name;
-		button.TextXAlignment = Enum.TextXAlignment.Left;
+		button.TextXAlignment = Enum.TextXAlignment.Right;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
 		button.FontFace = theme.Font;
