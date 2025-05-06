@@ -497,7 +497,7 @@ function library:CreateGUI()
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = (categorySettings.Icon and "          " or "   " ) .. categorySettings.Name
+		button.Text = (categorySettings.Icon and "                                 " or "             ") .. categorySettings.Name
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
@@ -596,7 +596,8 @@ function library:CreateCategory(categorySettings)
 	}
 
 	-- get icon asset
-	categorySettings.Icon = getcustomasset(categorySettings.Icon)
+	local getIcon = getcustomasset(categorySettings.Icon)
+	categorySettings.Icon = getIcon
 
 	-- create window category
 	local window = Instance.new("TextButton");
@@ -683,10 +684,6 @@ function library:CreateCategory(categorySettings)
 	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 	windowList.Parent = children;
 
-	function categoryapi:CreateModule(modulesettings)
-
-	end
-
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded
 
@@ -730,7 +727,9 @@ function library:CreateCategory(categorySettings)
 		if self.ThreadFix then
 			setthreadidentity(8)
 		end
+
 		children.CanvasSize = UDim2.fromOffset(0, windowList.AbsoluteContentSize.Y / scale.Scale)
+		
 		if categoryapi.Expanded then
 			window.Size = UDim2.fromOffset(220, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601))
 		end
