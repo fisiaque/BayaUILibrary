@@ -596,8 +596,7 @@ function library:CreateCategory(categorySettings)
 	}
 
 	-- get icon asset
-	local getIcon = getcustomasset(categorySettings.Icon)
-	categorySettings.Icon = getIcon
+	categorySettings.Icon = getcustomasset(categorySettings.Icon)
 
 	-- create window category
 	local window = Instance.new("TextButton");
