@@ -1178,7 +1178,7 @@ function libraryapi:Uninject()
 
 	LoopClean(libraryapi)
 
-	shared.library = nil
+	shared.baya = nil
 end
 
 -- clean
