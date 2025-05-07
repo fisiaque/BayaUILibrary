@@ -143,7 +143,7 @@ local function DownloadFile(path, func)
 		SetDownloadMessage(path)
 
 		local suc, res = pcall(function()
-			return game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/"..readfile("Baya/commit.txt").."/"..select(1, path:gsub("Baya/", "")), true)
+			return game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/"..readfile("Baya/Commits/Library.txt").."/"..select(1, path:gsub("Baya/", "")), true)
 		end)
 
 		if not suc or res == "404: Not Found" then
@@ -552,7 +552,7 @@ libraryapi.Components = setmetatable(components, {
 AddMaid(libraryapi)
 
 -- folder creation
-for _, folder in {"Baya", "Baya/UIAssets"} do
+for _, folder in {"Baya", "Baya/Commits", "Baya/UIAssets", "Baya/Games"} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -567,12 +567,15 @@ local commit = subbed:find("currentOid")
 commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 commit = commit and #commit == 40 and commit or "main"
 
-if commit == "main" or (isfile("Baya/commit.txt") and readfile("Baya/commit.txt") or "") ~= commit then
-    WipeFolder("Baya")
+if commit == "main" or (isfile("Baya/Commits/Library.txt") and readfile("Baya/Commits/Library.txt") or "") ~= commit then
     WipeFolder("Baya/UIAssets")
+
+	if isfile("Baya/Commits/Library.txt") then
+		delfile("Baya/Commits/Library.txt");
+	end
 end
 
-writefile("Baya/commit.txt", commit)
+writefile("Baya/Commits/Library.txt", commit)
 
 -- gui creation
 local gui = Instance.new("ScreenGui");
