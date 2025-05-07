@@ -40,16 +40,16 @@ local tween = {
 	tweenstwo = {};
 }
 local assets = { 
-	["Baya/UIAssets/Warning.png"] = "rbxassetid://125144969372589";
-	["Baya/UIAssets/Alert.png"] = "rbxassetid://102812705220441";
-	["Baya/UIAssets/Info.png"] = "rbxassetid://105237774908134";
-	["Baya/UIAssets/Notification.png"] = "rbxassetid://115871497200510";
-	["Baya/UIAssets/GUILogo.png"] = "rbxassetid://89243102639787";
-	["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
-	["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
-	["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
-	["Baya/UIAssets/PrayerIcon.png"] = "rbxassetid://112615257443345";
-	["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://71142378499430"; 
+	["Baya/Assets/Warning.png"] = "rbxassetid://125144969372589";
+	["Baya/Assets/Alert.png"] = "rbxassetid://102812705220441";
+	["Baya/Assets/Info.png"] = "rbxassetid://105237774908134";
+	["Baya/Assets/Notification.png"] = "rbxassetid://115871497200510";
+	["Baya/Assets/GUILogo.png"] = "rbxassetid://89243102639787";
+	["Baya/Assets/ExpandRight.png"] = "rbxassetid://93216503898531";
+	["Baya/Assets/ExpandUp.png"] = "rbxassetid://110148963103901";
+	["Baya/Assets/ActionIcon.png"] = "rbxassetid://129077738159596";
+	["Baya/Assets/PrayerIcon.png"] = "rbxassetid://112615257443345";
+	["Baya/Assets/BayaLogo.png"] = "rbxassetid://71142378499430"; 
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
@@ -552,7 +552,7 @@ libraryapi.Components = setmetatable(components, {
 AddMaid(libraryapi)
 
 -- folder creation
-for _, folder in {"Baya", "Baya/Commits", "Baya/UIAssets", "Baya/Games"} do
+for _, folder in {"Baya", "Baya/Commits", "Baya/Assets", "Baya/Games"} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -568,7 +568,7 @@ commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 commit = commit and #commit == 40 and commit or "main"
 
 if commit == "main" or (isfile("Baya/Commits/Library.txt") and readfile("Baya/Commits/Library.txt") or "") ~= commit then
-    WipeFolder("Baya/UIAssets")
+    WipeFolder("Baya/Assets")
 	WipeFolder("Baya/Commits")
 	WipeFolder("Baya/Games")
 	WipeFolder("Baya")
@@ -659,7 +659,7 @@ function libraryapi:CreateGUI()
 	logo.Size = UDim2.fromOffset(62, 18);
 	logo.Position = UDim2.fromOffset(11, 10);
 	logo.BackgroundTransparency = 1;
-	logo.Image = getcustomasset("Baya/UIAssets/GUILogo.png");
+	logo.Image = getcustomasset("Baya/Assets/GUILogo.png");
 	logo.ImageColor3 = select(3, theme.Main:ToHSV()) > 0.5 and theme.Text or Color3.new(1, 1, 1);
 	logo.Parent = window
 
@@ -718,7 +718,7 @@ function libraryapi:CreateGUI()
 		arrow.Size = UDim2.fromOffset(4, 8);
 		arrow.Position = UDim2.new(1, -20, 0, 16);
 		arrow.BackgroundTransparency = 1;
-		arrow.Image = getcustomasset("Baya/UIAssets/ExpandRight.png");
+		arrow.Image = getcustomasset("Baya/Assets/ExpandRight.png");
 		arrow.ImageColor3 = color.Lighten(theme.Main, 0.35);
 		arrow.Parent = button;
 
@@ -843,7 +843,7 @@ function libraryapi:CreateCategory(categorySettings)
 	arrow.Size = UDim2.fromOffset(9, 4);
 	arrow.Position = UDim2.fromOffset(20, 18);
 	arrow.BackgroundTransparency = 1;
-	arrow.Image = getcustomasset("Baya/UIAssets/ExpandUp.png");
+	arrow.Image = getcustomasset("Baya/Assets/ExpandUp.png");
 	arrow.ImageColor3 = Color3.fromRGB(150, 150, 150);
 	arrow.Rotation = 180;
 	arrow.Parent = arrowButton;
@@ -977,7 +977,7 @@ function libraryapi:Load()
 		image.Size = UDim2.fromOffset(26, 26);
 		image.Position = UDim2.fromOffset(3, 3);
 		image.BackgroundTransparency = 1
-		image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png");
+		image.Image = getcustomasset("Baya/Assets/BayaLogo.png");
 		image.Parent = button;
 
 		local buttoncorner = Instance.new("UICorner");
@@ -1032,7 +1032,7 @@ function libraryapi:CreateNotification(title, text, duration, type)
 		notification.Position = UDim2.new(1, 0, 1, -(29 + (78 * i)));
 		notification.ZIndex = 5;
 		notification.BackgroundTransparency = 1;
-		notification.Image = getcustomasset("Baya/UIAssets/Notification.png");
+		notification.Image = getcustomasset("Baya/Assets/Notification.png");
 		notification.ScaleType = Enum.ScaleType.Slice;
 		notification.SliceCenter = Rect.new(7, 7, 9, 9);
 		notification.Parent = notifications;
@@ -1043,7 +1043,7 @@ function libraryapi:CreateNotification(title, text, duration, type)
 		iconShadow.Position = UDim2.fromOffset(-5, -8);
 		iconShadow.ZIndex = 5;
 		iconShadow.BackgroundTransparency = 1;
-		iconShadow.Image = getcustomasset("Baya/UIAssets/" .. (type or "Info") .. ".png");
+		iconShadow.Image = getcustomasset("Baya/Assets/" .. (type or "Info") .. ".png");
 		iconShadow.ImageColor3 = Color3.new();
 		iconShadow.ImageTransparency = 0.5;
 		iconShadow.Parent = notification;
