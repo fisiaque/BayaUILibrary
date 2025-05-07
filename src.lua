@@ -3,36 +3,36 @@
 --\ \  __<   \ \  __ \  \ \____ \  \ \  __ \     \ \ \_\ \  \ \ \     \ \ \____  \ \ \  \ \  __<   \ \  __<   \ \  __ \  \ \  __<   \ \____ \  
 -- \ \_____\  \ \_\ \_\  \/\_____\  \ \_\ \_\     \ \_____\  \ \_\     \ \_____\  \ \_\  \ \_____\  \ \_\ \_\  \ \_\ \_\  \ \_\ \_\  \/\_____\ 
 --  \/_____/   \/_/\/_/   \/_____/   \/_/\/_/      \/_____/   \/_/      \/_____/   \/_/   \/_____/   \/_/ /_/   \/_/\/_/   \/_/ /_/   \/_____/ 
-                                                                                                                                                                                                                         
+
 local libraryapi = {
 	Windows = {
 		Draggable = {};
 	};
-    Categories = {};
-    Libraries = {};
+	Categories = {};
+	Libraries = {};
 	Modules = {};
-    Keybinds = {
-        Held = {};
-        Interact = {"RightShift"}
-    };
-    Loaded = false;
-    Place = game.PlaceId;
-    ThreadFix = setthreadidentity and true or false; -- checks if executor suppors setthreadidentity
-    Version = "0.0.1"
+	Keybinds = {
+		Held = {};
+		Interact = {"RightShift"}
+	};
+	Loaded = false;
+	Place = game.PlaceId;
+	ThreadFix = setthreadidentity and true or false; -- checks if executor suppors setthreadidentity
+	Version = "0.0.1"
 }
 
 -- variables
 local color = {};
 local theme = {
-    Interface = {
-        Hue = 0.46,
-		Sat = 0.96,
-		Value = 0.52
-    };
-    Main = Color3.fromRGB(20, 20, 20);
-    Text = Color3.fromRGB(200, 200, 200);
-    Font = Font.fromEnum(Enum.Font.Arial);
-    FontSemiBold = Font.fromEnum(Enum.Font.Arial, Enum.FontWeight.SemiBold);
+	Interface = {
+		Hue = 0.63,
+		Sat = 0.86,
+		Value = 0.91
+	};
+	Main = Color3.fromRGB(20, 20, 20);
+	Text = Color3.fromRGB(200, 200, 200);
+	Font = Font.fromEnum(Enum.Font.Arial);
+	FontSemiBold = Font.fromEnum(Enum.Font.Arial, Enum.FontWeight.SemiBold);
 	Tween = TweenInfo.new(0.15, Enum.EasingStyle.Linear);
 };
 local tween = {
@@ -44,12 +44,12 @@ local assets = {
 	["Baya/UIAssets/Alert.png"] = "rbxassetid://102812705220441";
 	["Baya/UIAssets/Info.png"] = "rbxassetid://105237774908134";
 	["Baya/UIAssets/Notification.png"] = "rbxassetid://115871497200510";
-    ["Baya/UIAssets/GUILogo.png"] = "rbxassetid://89243102639787";
-    ["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
-    ["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
-    ["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
+	["Baya/UIAssets/GUILogo.png"] = "rbxassetid://89243102639787";
+	["Baya/UIAssets/ExpandRight.png"] = "rbxassetid://93216503898531";
+	["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
+	["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
 	["Baya/UIAssets/PrayerIcon.png"] = "rbxassetid://112615257443345";
-    ["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://120654586984889";
+	["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://120654586984889";
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
@@ -73,7 +73,7 @@ local scale
 
 -- creates a safe reference to a roblox instance object if executor doesn"t already have on pre-built
 local cloneref = cloneref or function(obj)
-    return obj
+	return obj
 end
 
 -- services
@@ -129,7 +129,7 @@ local function SetDownloadMessage(text)
 			loadingLabel.TextColor3 = Color3.new(1, 1, 1)
 			loadingLabel.FontFace = theme.Font
 			loadingLabel.Parent = libraryapi.gui
-			
+
 			libraryapi.Downloader = loadingLabel
 		end
 
@@ -186,25 +186,25 @@ end
 
 -- get asset
 local function DownloadFile(path, func)
-    if not isfile(path) then
-        SetDownloadMessage(path)
+	if not isfile(path) then
+		SetDownloadMessage(path)
 
-        local suc, res = pcall(function()
-            return game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/"..readfile("Baya/commit.txt").."/"..select(1, path:gsub("Baya/", "")), true)
-        end)
+		local suc, res = pcall(function()
+			return game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/"..readfile("Baya/commit.txt").."/"..select(1, path:gsub("Baya/", "")), true)
+		end)
 
-        if not suc or res == "404: Not Found" then
-            error(res)
-        end
+		if not suc or res == "404: Not Found" then
+			error(res)
+		end
 
-        if path:find(".lua") then
-            res = marked .. res
-        end
+		if path:find(".lua") then
+			res = marked .. res
+		end
 
-        writefile(path, res)
-    end
+		writefile(path, res)
+	end
 
-    return (func or readfile)(path)
+	return (func or readfile)(path)
 end
 local isfile = isfile or function(file)
 	local suc, res = pcall(function()
@@ -224,20 +224,22 @@ end
 
 -- rearrange
 local function RearrangeButton(optionapi, _bool)
-    optionapi.Enabled = _bool
-    
-    tween:Tween(optionapi.Object.Arrow, theme.Tween, {
-        Position = UDim2.new(1, optionapi.Enabled and -14 or -20, 0, 16)
-    })
+	optionapi.Enabled = _bool
+	
+	if optionapi.Object:FindFirstChild("Arrow") then
+		tween:Tween(optionapi.Object.Arrow, theme.Tween, {
+			Position = UDim2.new(1, optionapi.Enabled and -14 or -20, 0, 16)
+		})
+	end
 
-    optionapi.Object.TextColor3 = optionapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
-    
-    if optionapi.Icon then
-        optionapi.Icon.ImageColor3 = optionapi.Object.TextColor3
-    end
-    
-    optionapi.Object.BackgroundColor3 = optionapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
-    optionapi.Settings.Window.Visible = optionapi.Enabled
+	optionapi.Object.TextColor3 = optionapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
+
+	if optionapi.Icon then
+		optionapi.Icon.ImageColor3 = optionapi.Object.TextColor3
+	end
+
+	optionapi.Object.BackgroundColor3 = optionapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
+	optionapi.Settings.Window.Visible = optionapi.Enabled
 end
 
 -- check keybinding
@@ -258,18 +260,18 @@ end
 
 -- wipe folder
 local function WipeFolder(path)
-    -- check path
-    if not isfolder(path) then return end
-	
+	-- check path
+	if not isfolder(path) then return end
+
 	local string = string.gsub(marked, "\n", "")
 
-    for _, file in listfiles(path) do
+	for _, file in listfiles(path) do
 		local search = select(1, readfile(file):find(string))
 
-        if isfile(file) and search == 1 then
-            delfile(file)
-        end
-    end
+		if isfile(file) and search == 1 then
+			delfile(file)
+		end
+	end
 end
 
 -- clean 
@@ -299,7 +301,7 @@ local function AddTooltip(gui, text)
 
 	local function TooltipMoved(x, y)
 		local right = x + 16 + tooltip.Size.X.Offset > (scale.Scale * 1920)
-		
+
 		tooltip.Position = UDim2.fromOffset(
 			(right and x - (tooltip.Size.X.Offset * scale.Scale) - 16 or x + 16) / scale.Scale,
 			((y + 11) - (tooltip.Size.Y.Offset / 2)) / scale.Scale
@@ -330,37 +332,37 @@ local function Dragify(gui, window)
 		CanClick = true
 	}
 
-    gui.InputBegan:Connect(function(inputObj)
-        if window and not window.Visible then return end -- window has to be visible
+	gui.InputBegan:Connect(function(inputObj)
+		if window and not window.Visible then return end -- window has to be visible
 
-        if 
-            (inputObj.UserInputType == Enum.UserInputType.MouseButton1 or inputObj.UserInputType == Enum.UserInputType.Touch) 
-            and (inputObj.Position.Y - gui.AbsolutePosition.Y < 40 or window)
-        then
-            local dragPosition = Vector2.new(
+		if 
+			(inputObj.UserInputType == Enum.UserInputType.MouseButton1 or inputObj.UserInputType == Enum.UserInputType.Touch) 
+			and (inputObj.Position.Y - gui.AbsolutePosition.Y < 40 or window)
+		then
+			local dragPosition = Vector2.new(
 				gui.AbsolutePosition.X - inputObj.Position.X,
 				gui.AbsolutePosition.Y - inputObj.Position.Y + guiService:GetGuiInset().Y
 			) / libraryapi.gui.ScaledFrame.UIScale.Scale
 
-            local changed = inputService.InputChanged:Connect(function(input)
+			local changed = inputService.InputChanged:Connect(function(input)
 				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not libraryapi.Windows.Dragging or libraryapi.Windows.Dragging == gui) then
 					libraryapi.Windows.Dragging = gui -- prevents more than 1 window from "stack" dragging
-					
+
 					local position = input.Position;
-                    -- snap to grid if left shift held
-                    if inputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                        dragPosition = (dragPosition // 3) * 3;
-                        position = (position // 3) * 3;
-                    end
-					
+					-- snap to grid if left shift held
+					if inputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+						dragPosition = (dragPosition // 3) * 3;
+						position = (position // 3) * 3;
+					end
+
 					local x = math.clamp((position.X / libraryapi.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) / libraryapi.gui.ScaledFrame.UIScale.Scale)
 					local y = math.clamp((position.Y / libraryapi.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) / libraryapi.gui.ScaledFrame.UIScale.Scale)
-					
-					gui.Position = UDim2.fromOffset(x, y);
-                end
-            end)
 
-            local ended
+					gui.Position = UDim2.fromOffset(x, y);
+				end
+			end)
+
+			local ended
 			ended = inputObj.Changed:Connect(function()
 				if inputObj.UserInputState == Enum.UserInputState.End then
 					if gui.Position ~= libraryapi.Windows.Draggable[gui].Position then -- if window has been moved then it won"t toggle after moved
@@ -381,32 +383,32 @@ local function Dragify(gui, window)
 					end
 				end
 			end)
-        end
-    end)
+		end
+	end)
 end
 
 -- generates a random string
 local function RandomString()
-    local array = {};
+	local array = {};
 
-    for i = 1, math.random(10, 100) do
-        array[i] = string.char(math.random(32, 126))
-    end
+	for i = 1, math.random(10, 100) do
+		array[i] = string.char(math.random(32, 126))
+	end
 
-    return table.concat(array)
+	return table.concat(array)
 end
 
 -- colors
 do
-    function color.Darken(col, num)
-        local h, s, v = col:ToHSV()
-        return Color3.fromHSV(h, s, math.clamp(select(3, theme.Main:ToHSV()) > 0.5 and v + num or v - num, 0, 1))
-    end
+	function color.Darken(col, num)
+		local h, s, v = col:ToHSV()
+		return Color3.fromHSV(h, s, math.clamp(select(3, theme.Main:ToHSV()) > 0.5 and v + num or v - num, 0, 1))
+	end
 
-    function color.Lighten(col, num)
-        local h, s, v = col:ToHSV()
-        return Color3.fromHSV(h, s, math.clamp(select(3, theme.Main:ToHSV()) > 0.5 and v - num or v + num, 0, 1))
-    end
+	function color.Lighten(col, num)
+		local h, s, v = col:ToHSV()
+		return Color3.fromHSV(h, s, math.clamp(select(3, theme.Main:ToHSV()) > 0.5 and v - num or v + num, 0, 1))
+	end
 end
 
 -- tween
@@ -452,49 +454,115 @@ libraryapi.Libraries = {
 
 components = {
 	Button = function(optionSettings, children, api)
+		local moduleapi = {
+			Enabled = false;
+			Category = api.Button.Name;
+			Running = false;
+		}
+		
+		local hovered = false;
+
 		local button = Instance.new("TextButton");
-		button.Name = optionSettings.Name .. "Button";
-		button.Size = UDim2.new(1, 0, 0, 31);
-		button.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0);
+		button.Name = optionSettings.Name;
+		button.Size = UDim2.fromOffset(220, 40);
+		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Visible = optionSettings.Visible == nil or optionSettings.Visible;
-		button.Text = "";
+		button.Text = '            ' .. optionSettings.Name;
+		button.TextXAlignment = Enum.TextXAlignment.Left;
+		button.TextColor3 = color.Darken(theme.Text, 0.16);
+		button.TextSize = 14;
+		button.FontFace = theme.Font;
 		button.Parent = children;
 
 		AddTooltip(button, optionSettings.Tooltip);
 
-		local bg = Instance.new("Frame");
-		bg.Size = UDim2.fromOffset(200, 27);
-		bg.Position = UDim2.fromOffset(10, 2);
-		bg.BackgroundColor3 = color.Lighten(theme.Main, 0.05);
-		bg.Parent = button;
-
-		local label = Instance.new("TextLabel");
-		label.Size = UDim2.new(1, -4, 1, -4);
-		label.Position = UDim2.fromOffset(2, 2);
-		label.BackgroundColor3 = theme.Main;
-		label.Text = optionSettings.Name;
-		label.TextColor3 = color.Darken(theme.Text, 0.16);
-		label.TextSize = 14;
-		label.FontFace = theme.Font;
-		label.Parent = bg;
-
+		local gradient = Instance.new("UIGradient");
+		gradient.Rotation = 90;
+		gradient.Enabled = false;
+		gradient.Parent = button;
+		
+		moduleapi.Children = children;
+		moduleapi.Object = button
+		
 		optionSettings.Function = optionSettings.Function or function() end
 
+		AddMaid(moduleapi);
+		
+		function moduleapi:Click(multiple)
+			if moduleapi.Running ~= false then return end
+			moduleapi.Running = true
+			
+			if libraryapi.ThreadFix then
+				setthreadidentity(8);
+			end
+
+			self.Enabled = true;
+			gradient.Enabled = true;
+
+			moduleapi.Object.TextColor3 = moduleapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
+			moduleapi.Object.BackgroundColor3 = moduleapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
+			
+			task.spawn(optionSettings.Function, self.Enabled);
+			
+			task.wait(.02)
+			
+			self.Enabled = false;
+			gradient.Enabled = false;
+
+			moduleapi.Object.TextColor3 = moduleapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
+			moduleapi.Object.BackgroundColor3 = moduleapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
+
+			if not self.Enabled then -- clear connections
+				for _, v in self.Connections do
+					v:Disconnect();
+				end
+				table.clear(self.Connections);
+			end
+			
+			moduleapi.Running = false
+		end
+
 		button.MouseEnter:Connect(function()
-			tween:Tween(bg, theme.Tween, {
-				BackgroundColor3 = color.Lighten(theme.Main, 0.0875)
-			})
-		end)
+			hovered = true;
 
+			if not moduleapi.Enabled and not children.Visible then
+				button.TextColor3 = theme.Text;
+				button.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+			end
+		end)
 		button.MouseLeave:Connect(function()
-			tween:Tween(bg, theme.Tween, {
-				BackgroundColor3 = color.Lighten(theme.Main, 0.05)
-			})
-		end)
+			hovered = false;
 
-		button.MouseButton1Click:Connect(optionSettings.Function)
+			if not moduleapi.Enabled and not children.Visible then
+				button.TextColor3 = color.Darken(theme.Text, 0.16);
+				button.BackgroundColor3 = theme.Main;
+			end
+		end)
+		button.MouseButton1Click:Connect(function()
+			moduleapi:Click();
+		end)
+		
+		moduleapi.Object = button;
+		libraryapi.Modules[button.Name] = moduleapi;
+
+		local sorting = {}
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
 	end;
 }
 
@@ -509,7 +577,6 @@ libraryapi.Components = setmetatable(components, {
 		rawset(self, ind, func)
 	end
 })
-
 
 --|| ||--
 AddMaid(libraryapi)
@@ -686,19 +753,19 @@ function libraryapi:CreateGUI()
 		optionapi.Name = categorySettings.Name;
 		optionapi.Icon = icon;
 		optionapi.Object = button;
-		
+
 		-- button toggle
 		function optionapi:Toggle()
 			for _, _button in libraryapi.Categories.Main.Buttons do
 				if _button ~= libraryapi.Categories.Main.Buttons[optionapi.Name] and _button.Enabled then
 					RearrangeButton(_button, false) -- close
-					
+
 					pp = _button.Settings.Window.Position
 				end
 			end
-			
+
 			RearrangeButton(self, not self.Enabled)
-			
+
 			if self.Enabled == false then -- if button closed then save previous position
 				pp = optionapi.Settings.Window.Position
 			end
@@ -838,172 +905,6 @@ function libraryapi:CreateCategory(categorySettings)
 	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 	windowList.Parent = children;
 
-	function categoryapi:CreateModule(moduleSettings)
-		libraryapi:Remove(moduleSettings.Name)
-
-		local moduleapi = {
-			Enabled = false;
-			Name = moduleSettings.Name;
-			Category = categorySettings.Name;
-		}
-
-		local hovered = false
-
-		local moduleButton = Instance.new("TextButton");
-		moduleButton.Name = moduleSettings.Name;
-		moduleButton.Size = UDim2.fromOffset(220, 40);
-		moduleButton.BackgroundColor3 = theme.Main;
-		moduleButton.BorderSizePixel = 0;
-		moduleButton.AutoButtonColor = false;
-		moduleButton.Text = '            '..moduleSettings.Name;
-		moduleButton.TextXAlignment = Enum.TextXAlignment.Left;
-		moduleButton.TextColor3 = color.Darken(theme.Text, 0.16);
-		moduleButton.TextSize = 14;
-		moduleButton.FontFace = theme.Font;
-		moduleButton.Parent = children;
-
-		local gradient = Instance.new("UIGradient");
-		gradient.Rotation = 90;
-		gradient.Enabled = false;
-		gradient.Parent = moduleButton;
-
-		local moduleChildren = Instance.new("Frame");
-		moduleChildren.Name = moduleSettings.Name .. "Children";
-		moduleChildren.Size = UDim2.new(1, 0, 0, 0);
-		moduleChildren.BackgroundColor3 = color.Darken(theme.Main, 0.02);
-		moduleChildren.BorderSizePixel = 0;
-		moduleChildren.Visible = false;
-		moduleChildren.Parent = children;
-
-		moduleapi.Children = moduleChildren;
-
-		local windowList = Instance.new("UIListLayout");
-		windowList.SortOrder = Enum.SortOrder.LayoutOrder;
-		windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
-		windowList.Parent = moduleChildren;
-
-		local divider = Instance.new("Frame");
-		divider.Name = "Divider";
-		divider.Size = UDim2.new(1, 0, 0, 1);
-		divider.Position = UDim2.new(0, 0, 1, -1);
-		divider.BackgroundColor3 = Color3.new(0.19, 0.19, 0.19);
-		divider.BackgroundTransparency = 0.52;
-		divider.BorderSizePixel = 0;
-		divider.Visible = false;
-		divider.Parent = moduleButton;
-
-		moduleSettings.Function = moduleSettings.Function or function() end
-
-		AddMaid(moduleapi);
-
-		function moduleapi:Toggle(multiple)
-			if libraryapi.ThreadFix then
-				setthreadidentity(8);
-			end
-
-			self.Enabled = not self.Enabled;
-			divider.Visible = self.Enabled;
-			gradient.Enabled = self.Enabled;
-
-			moduleButton.TextColor3 = (hovered or moduleChildren.Visible) and theme.Text or color.Darken(theme.Text, 0.16)
-			moduleButton.BackgroundColor3 = (hovered or moduleChildren.Visible) and color.Lighten(theme.Main, 0.02) or theme.Main
-
-			if not self.Enabled then -- clear connections
-				for _, v in self.Connections do
-					v:Disconnect();
-				end
-				table.clear(self.Connections);
-			end
-
-			task.spawn(moduleSettings.Function, self.Enabled);
-		end
-
-		for i, v in components do
-			moduleapi["Create" .. i] = function(_, optionSettings)
-				return v(optionSettings, moduleChildren, moduleapi)
-			end
-		end
-
-		moduleButton.MouseEnter:Connect(function()
-			hovered = true;
-
-			if not moduleapi.Enabled and not moduleChildren.Visible then
-				moduleButton.TextColor3 = theme.Text;
-				moduleButton.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
-			end
-		end)
-		moduleButton.MouseLeave:Connect(function()
-			hovered = false;
-
-			if not moduleapi.Enabled and not moduleChildren.Visible then
-				moduleButton.TextColor3 = color.Darken(theme.Text, 0.16);
-				moduleButton.BackgroundColor3 = theme.Main;
-			end
-		end)
-		moduleButton.MouseButton1Click:Connect(function()
-			moduleapi:Toggle();
-		end)
-		moduleButton.MouseButton2Click:Connect(function()
-			moduleChildren.Visible = not moduleChildren.Visible;
-		end)
-
-		if inputService.TouchEnabled then -- if on mobile
-			local heldbutton = false
-
-			moduleButton.MouseButton1Down:Connect(function()
-				heldbutton = true
-
-				local holdTime, holdPos = tick(), inputService:GetMouseLocation()
-
-				repeat
-					heldbutton = (inputService:GetMouseLocation() - holdPos).Magnitude < 3;
-					task.wait();
-				until (tick() - holdTime) > 1 or not heldbutton or not clickFrame.Visible
-				
-				if heldbutton and clickFrame.Visible then
-					if libraryapi.ThreadFix then
-						setthreadidentity(8)
-					end
-
-					moduleChildren.Visible = not moduleChildren.Visible;
-				end
-			end)
-
-			moduleButton.MouseButton1Up:Connect(function()
-				heldbutton = false
-			end)
-		end
-
-		windowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-			if libraryapi.ThreadFix then
-				setthreadidentity(8);
-			end
-
-			moduleChildren.Size = UDim2.new(1, 0, 0, windowList.AbsoluteContentSize.Y / scale.Scale);
-		end)
-
-		moduleapi.Object = moduleButton;
-		libraryapi.Modules[moduleSettings.Name] = moduleapi;
-
-		local sorting = {}
-		for _, v in libraryapi.Modules do
-			sorting[v.Category] = sorting[v.Category] or {};
-			table.insert(sorting[v.Category], v.Name);
-		end
-
-		for _, sort in sorting do
-			table.sort(sort);
-
-			for i, v in sort do
-				libraryapi.Modules[v].Index = i;
-				libraryapi.Modules[v].Object.LayoutOrder = i;
-				libraryapi.Modules[v].Children.LayoutOrder = i;
-			end
-		end
-
-		return moduleapi
-	end
-
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded;
 
@@ -1011,6 +912,13 @@ function libraryapi:CreateCategory(categorySettings)
 		arrow.Rotation = self.Expanded and 0 or 180;
 		window.Size = UDim2.fromOffset(220, self.Expanded and math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601) or 41);
 		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible;
+	end
+
+	-- buttons
+	for i, v in components do
+		categoryapi["Create" .. i] = function(_, optionSettings)
+			return v(optionSettings, children, categoryapi)
+		end
 	end
 
 	-- arrow button
@@ -1032,6 +940,7 @@ function libraryapi:CreateCategory(categorySettings)
 		if self.ThreadFix then
 			setthreadidentity(8)
 		end
+		
 		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
 	end)
 
@@ -1049,7 +958,7 @@ function libraryapi:CreateCategory(categorySettings)
 		end
 
 		children.CanvasSize = UDim2.fromOffset(0, windowList.AbsoluteContentSize.Y / scale.Scale)
-		
+
 		if categoryapi.Expanded then
 			window.Size = UDim2.fromOffset(220, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601))
 		end
@@ -1103,12 +1012,12 @@ function libraryapi:Load()
 		image.BackgroundTransparency = 1
 		image.Image = getcustomasset("Baya/UIAssets/BayaLogo.png");
 		image.Parent = button;
-		
+
 		local buttoncorner = Instance.new("UICorner");
 		buttoncorner.Parent = button;
-		
+
 		self.BayaButton = button;
-		
+
 		button.MouseButton1Click:Connect(function()
 			if libraryapi.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
 
@@ -1318,7 +1227,7 @@ libraryapi:Clean(scale:GetPropertyChangedSignal("Scale"):Connect(function()
 	for window, _ in libraryapi.Windows.Draggable do
 		local x = math.clamp(window.Position.X.Offset, 0, (window.Parent.AbsoluteSize.X - window.AbsoluteSize.X) / libraryapi.gui.ScaledFrame.UIScale.Scale)
 		local y = math.clamp(window.Position.Y.Offset, 0, (window.Parent.AbsoluteSize.Y - window.AbsoluteSize.Y) / libraryapi.gui.ScaledFrame.UIScale.Scale)
-					
+
 		window.Position = UDim2.fromOffset(x, y);
 	end
 end))
