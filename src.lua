@@ -569,10 +569,9 @@ commit = commit and #commit == 40 and commit or "main"
 
 if commit == "main" or (isfile("Baya/Commits/Library.txt") and readfile("Baya/Commits/Library.txt") or "") ~= commit then
     WipeFolder("Baya/UIAssets")
-
-	if isfile("Baya/Commits/Library.txt") then
-		delfile("Baya/Commits/Library.txt");
-	end
+	WipeFolder("Baya/Commits")
+	WipeFolder("Baya/Games")
+	WipeFolder("Baya")
 end
 
 writefile("Baya/Commits/Library.txt", commit)
