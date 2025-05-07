@@ -484,12 +484,11 @@ components = {
 			moduleapi.Object.TextColor3 = moduleapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
 			moduleapi.Object.BackgroundColor3 = moduleapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
 
-			if not self.Enabled then -- clear connections
-				for _, v in self.Connections do
-					v:Disconnect();
-				end
-				table.clear(self.Connections);
+			for _, v in self.Connections do
+				v:Disconnect();
 			end
+
+			table.clear(self.Connections);
 			
 			moduleapi.Running = false
 		end
@@ -1148,6 +1147,12 @@ end
 
 function libraryapi:Uninject()
 	libraryapi.Loaded = nil
+
+	for _, v in self.Modules do
+		if v["Toggle"] and v.Enabled then
+			v:Toggle()
+		end
+	end
 
 	for _, v in self.Categories do
 		if v.Type == "Overlay" and v.Button.Enabled then
