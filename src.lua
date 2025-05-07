@@ -962,7 +962,7 @@ function libraryapi:Load()
 
 	if inputService.TouchEnabled then -- mobile
 		local button = Instance.new("TextButton");
-		button.Name = "BayaMobile"
+		button.Name = "BayaMobile";
 		button.Size = UDim2.fromOffset(32, 32);
 		button.Position = UDim2.new(0, 4, 1, -35);
 		button.BackgroundColor3 = Color3.new();
