@@ -557,6 +557,8 @@ components = {
 		toggle.FontFace = theme.Font;
 		toggle.Parent = children;
 
+		AddTooltip(toggle, optionSettings.Tooltip);
+
 		local knobHolder = Instance.new("Frame");
 		knobHolder.Name = "Knob";
 		knobHolder.Size = UDim2.fromOffset(22, 12);
