@@ -4,12 +4,13 @@
 -- \ \_____\  \ \_\ \_\  \/\_____\  \ \_\ \_\     \ \_____\  \ \_\     \ \_____\  \ \_\  \ \_____\  \ \_\ \_\  \ \_\ \_\  \ \_\ \_\  \/\_____\ 
 --  \/_____/   \/_/\/_/   \/_____/   \/_/\/_/      \/_____/   \/_/      \/_____/   \/_/   \/_____/   \/_/ /_/   \/_/\/_/   \/_/ /_/   \/_____/ 
                                                                                                                                                                                                                          
-local library = {
+local libraryapi = {
 	Windows = {
 		Draggable = {};
 	};
     Categories = {};
     Libraries = {};
+	Modules = {};
     Keybinds = {
         Held = {};
         Interact = {"RightShift"}
@@ -62,6 +63,14 @@ local pp = UDim2.fromOffset(236, 60)
 local fontsize = Instance.new('GetTextBoundsParams')
 fontsize.Width = math.huge
 
+-- tooltip
+local showTooltip = true
+
+--
+local components
+local tooltip
+local scale
+
 -- creates a safe reference to a roblox instance object if executor doesn"t already have on pre-built
 local cloneref = cloneref or function(obj)
     return obj
@@ -108,8 +117,8 @@ local getfontsize = function(text, size, font)
 end
 
 local function SetDownloadMessage(text)
-	if library.Loaded ~= true then
-		local loadingLabel = library.Downloader
+	if libraryapi.Loaded ~= true then
+		local loadingLabel = libraryapi.Downloader
 
 		if not loadingLabel then
 			loadingLabel = Instance.new("TextLabel")
@@ -119,13 +128,60 @@ local function SetDownloadMessage(text)
 			loadingLabel.TextSize = 20
 			loadingLabel.TextColor3 = Color3.new(1, 1, 1)
 			loadingLabel.FontFace = theme.Font
-			loadingLabel.Parent = library.gui
+			loadingLabel.Parent = libraryapi.gui
 			
-			library.Downloader = loadingLabel
+			libraryapi.Downloader = loadingLabel
 		end
 
 		loadingLabel.Text = "Downloading " .. text
 	end
+end
+
+-- create mobile
+local function CreateMobileButton(buttonapi, position) -- REMOVE?
+	local heldbutton = false
+
+	local button = Instance.new('TextButton')
+	button.Size = UDim2.fromOffset(40, 40)
+	button.Position = UDim2.fromOffset(position.X, position.Y)
+	button.AnchorPoint = Vector2.new(0.5, 0.5)
+	button.BackgroundColor3 = buttonapi.Enabled and Color3.new(0, 0.7, 0) or Color3.new()
+	button.BackgroundTransparency = 0.5
+	button.Text = buttonapi.Name
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.TextScaled = true
+	button.Font = Enum.Font.Gotham
+	button.Parent = libraryapi.gui
+
+	local buttonconstraint = Instance.new('UITextSizeConstraint')
+	buttonconstraint.MaxTextSize = 16
+	buttonconstraint.Parent = button
+
+	button.MouseButton1Down:Connect(function()
+		heldbutton = true
+
+		local holdtime, holdpos = tick(), inputService:GetMouseLocation()
+		repeat
+			heldbutton = (inputService:GetMouseLocation() - holdpos).Magnitude < 6
+			task.wait()
+		until (tick() - holdtime) > 1 or not heldbutton
+
+		if heldbutton then
+			buttonapi.Bind = {}
+			button:Destroy()
+		end
+	end)
+
+	button.MouseButton1Up:Connect(function()
+		heldbutton = false
+	end)
+
+	button.MouseButton1Click:Connect(function()
+		buttonapi:Toggle()
+		button.BackgroundColor3 = buttonapi.Enabled and Color3.new(0, 0.7, 0) or Color3.new()
+	end)
+
+	buttonapi.Bind = {Button = button}
 end
 
 -- get asset
@@ -237,9 +293,39 @@ local function AddMaid(object)
 	end
 end
 
+-- 
+local function AddTooltip(gui, text)
+	if not text then return end
+
+	local function TooltipMoved(x, y)
+		local right = x + 16 + tooltip.Size.X.Offset > (scale.Scale * 1920)
+		
+		tooltip.Position = UDim2.fromOffset(
+			(right and x - (tooltip.Size.X.Offset * scale.Scale) - 16 or x + 16) / scale.Scale,
+			((y + 11) - (tooltip.Size.Y.Offset / 2)) / scale.Scale
+		)
+
+		tooltip.Visible = showTooltip
+	end
+
+	gui.MouseEnter:Connect(function(x, y)
+		local tooltipSize = getfontsize(text, tooltip.TextSize, theme.Font)
+		tooltip.Size = UDim2.fromOffset(tooltipSize.X + 10, tooltipSize.Y + 10)
+		tooltip.Text = text
+
+		TooltipMoved(x, y)
+	end)
+
+	gui.MouseMoved:Connect(TooltipMoved)
+
+	gui.MouseLeave:Connect(function()
+		tooltip.Visible = false
+	end)
+end
+
 -- make gui draggable
 local function Dragify(gui, window)
-	library.Windows.Draggable[gui] = {
+	libraryapi.Windows.Draggable[gui] = {
 		Position = gui.Position;
 		CanClick = true
 	}
@@ -254,11 +340,11 @@ local function Dragify(gui, window)
             local dragPosition = Vector2.new(
 				gui.AbsolutePosition.X - inputObj.Position.X,
 				gui.AbsolutePosition.Y - inputObj.Position.Y + guiService:GetGuiInset().Y
-			) / library.gui.ScaledFrame.UIScale.Scale
+			) / libraryapi.gui.ScaledFrame.UIScale.Scale
 
             local changed = inputService.InputChanged:Connect(function(input)
-				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not library.Windows.Dragging or library.Windows.Dragging == gui) then
-					library.Windows.Dragging = gui -- prevents more than 1 window from "stack" dragging
+				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not libraryapi.Windows.Dragging or libraryapi.Windows.Dragging == gui) then
+					libraryapi.Windows.Dragging = gui -- prevents more than 1 window from "stack" dragging
 					
 					local position = input.Position;
                     -- snap to grid if left shift held
@@ -267,8 +353,8 @@ local function Dragify(gui, window)
                         position = (position // 3) * 3;
                     end
 					
-					local x = math.clamp((position.X / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
-					local y = math.clamp((position.Y / library.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
+					local x = math.clamp((position.X / libraryapi.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) / libraryapi.gui.ScaledFrame.UIScale.Scale)
+					local y = math.clamp((position.Y / libraryapi.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) / libraryapi.gui.ScaledFrame.UIScale.Scale)
 					
 					gui.Position = UDim2.fromOffset(x, y);
                 end
@@ -277,14 +363,14 @@ local function Dragify(gui, window)
             local ended
 			ended = inputObj.Changed:Connect(function()
 				if inputObj.UserInputState == Enum.UserInputState.End then
-					if gui.Position ~= library.Windows.Draggable[gui].Position then -- if window has been moved then it won"t toggle after moved
-						library.Windows.Dragging = nil
+					if gui.Position ~= libraryapi.Windows.Draggable[gui].Position then -- if window has been moved then it won"t toggle after moved
+						libraryapi.Windows.Dragging = nil
 
-						library.Windows.Draggable[gui].Position = gui.Position
-						library.Windows.Draggable[gui].CanClick = false
+						libraryapi.Windows.Draggable[gui].Position = gui.Position
+						libraryapi.Windows.Draggable[gui].CanClick = false
 
 						task.delay(.25, function()
-							library.Windows.Draggable[gui].CanClick = true
+							libraryapi.Windows.Draggable[gui].CanClick = true
 						end)
 					end
 					if changed then
@@ -356,8 +442,77 @@ do
 	end
 end
 
+libraryapi.Libraries = {
+	color = color,
+	getcustomasset = getcustomasset,
+	getfontsize = getfontsize,
+	tween = tween,
+	theme = theme,
+}
+
+components = {
+	Button = function(optionSettings, children, api)
+		local button = Instance.new("TextButton");
+		button.Name = optionSettings.Name .. "Button";
+		button.Size = UDim2.new(1, 0, 0, 31);
+		button.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0);
+		button.BorderSizePixel = 0;
+		button.AutoButtonColor = false;
+		button.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		button.Text = "";
+		button.Parent = children;
+
+		AddTooltip(button, optionSettings.Tooltip);
+
+		local bg = Instance.new("Frame");
+		bg.Size = UDim2.fromOffset(200, 27);
+		bg.Position = UDim2.fromOffset(10, 2);
+		bg.BackgroundColor3 = color.Lighten(theme.Main, 0.05);
+		bg.Parent = button;
+
+		local label = Instance.new("TextLabel");
+		label.Size = UDim2.new(1, -4, 1, -4);
+		label.Position = UDim2.fromOffset(2, 2);
+		label.BackgroundColor3 = theme.Main;
+		label.Text = optionSettings.Name;
+		label.TextColor3 = color.Darken(theme.Text, 0.16);
+		label.TextSize = 14;
+		label.FontFace = theme.Font;
+		label.Parent = bg;
+
+		optionSettings.Function = optionSettings.Function or function() end
+
+		button.MouseEnter:Connect(function()
+			tween:Tween(bg, theme.Tween, {
+				BackgroundColor3 = color.Lighten(theme.Main, 0.0875)
+			})
+		end)
+
+		button.MouseLeave:Connect(function()
+			tween:Tween(bg, theme.Tween, {
+				BackgroundColor3 = color.Lighten(theme.Main, 0.05)
+			})
+		end)
+
+		button.MouseButton1Click:Connect(optionSettings.Function)
+	end;
+}
+
+libraryapi.Components = setmetatable(components, {
+	__newindex = function(self, ind, func)
+		for _, v in libraryapi.Modules do
+			rawset(v, 'Create'..ind, function(_, settings)
+				return func(settings, v.Children, v)
+			end)
+		end
+
+		rawset(self, ind, func)
+	end
+})
+
+
 --|| ||--
-AddMaid(library)
+AddMaid(libraryapi)
 
 -- folder creation
 for _, folder in {"Baya", "Baya/UIAssets"} do
@@ -366,7 +521,7 @@ for _, folder in {"Baya", "Baya/UIAssets"} do
 	end
 end
 
--- update baya library
+-- update baya libraryapi
 local _, subbed = pcall(function()
     return game:HttpGet("https://github.com/fisiaque/BayaUILibrary")
 end)
@@ -391,7 +546,7 @@ gui.IgnoreGuiInset = true;
 gui.OnTopOfCoreBlur = true
 
 -- if threadidentity exist parent to core gui otherwise player gui
-if library.ThreadFix then
+if libraryapi.ThreadFix then
     gui.Parent = cloneref(game:GetService("CoreGui"));
 else
     gui.Parent = cloneref(game:GetService("Players")).LocalPlayer.PlayerGui;
@@ -399,7 +554,7 @@ else
 end
 
 -- set a main variable for gui
-library.gui = gui
+libraryapi.gui = gui
 
 -- create main frame
 local scaledFrame = Instance.new("Frame");
@@ -409,7 +564,7 @@ scaledFrame.BackgroundTransparency = 1;
 scaledFrame.Parent = gui
 
 -- create UI scale
-local scale = Instance.new("UIScale");
+scale = Instance.new("UIScale");
 scale.Scale = math.max(gui.AbsoluteSize.X / 1920, 0.6);
 scale.Parent = scaledFrame;
 
@@ -430,7 +585,7 @@ clickFrame.Visible = false;
 clickFrame.Parent = scaledFrame
 
 -- create tooltip
-local tooltip = Instance.new("TextLabel");
+tooltip = Instance.new("TextLabel");
 tooltip.Name = "Tooltip";
 tooltip.ZIndex = 5;
 tooltip.BackgroundColor3 = color.Darken(theme.Main, 0.2);
@@ -442,8 +597,8 @@ tooltip.TextSize = 12;
 tooltip.FontFace = theme.Font;
 tooltip.Parent = scaledFrame
 
--- library
-function library:CreateGUI()
+-- libraryapi
+function libraryapi:CreateGUI()
 	local categoryapi = {
 		Type = "MainWindow";
 		Buttons = {};
@@ -534,8 +689,8 @@ function library:CreateGUI()
 		
 		-- button toggle
 		function optionapi:Toggle()
-			for _, _button in library.Categories.Main.Buttons do
-				if _button ~= library.Categories.Main.Buttons[optionapi.Name] and _button.Enabled then
+			for _, _button in libraryapi.Categories.Main.Buttons do
+				if _button ~= libraryapi.Categories.Main.Buttons[optionapi.Name] and _button.Enabled then
 					RearrangeButton(_button, false) -- close
 					
 					pp = _button.Settings.Window.Position
@@ -589,7 +744,7 @@ function library:CreateGUI()
 	return categoryapi
 end
 
-function library:CreateCategory(categorySettings)
+function libraryapi:CreateCategory(categorySettings)
 	local categoryapi = {
 		Type = "Category";
 		Expanded = false
@@ -683,13 +838,179 @@ function library:CreateCategory(categorySettings)
 	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 	windowList.Parent = children;
 
-	function categoryapi:Expand()
-		self.Expanded = not self.Expanded
+	function categoryapi:CreateModule(moduleSettings)
+		libraryapi:Remove(moduleSettings.Name)
 
-		children.Visible = self.Expanded
+		local moduleapi = {
+			Enabled = false;
+			Name = moduleSettings.Name;
+			Category = categorySettings.Name;
+		}
+
+		local hovered = false
+
+		local moduleButton = Instance.new("TextButton");
+		moduleButton.Name = moduleSettings.Name;
+		moduleButton.Size = UDim2.fromOffset(220, 40);
+		moduleButton.BackgroundColor3 = theme.Main;
+		moduleButton.BorderSizePixel = 0;
+		moduleButton.AutoButtonColor = false;
+		moduleButton.Text = '            '..moduleSettings.Name;
+		moduleButton.TextXAlignment = Enum.TextXAlignment.Left;
+		moduleButton.TextColor3 = color.Darken(theme.Text, 0.16);
+		moduleButton.TextSize = 14;
+		moduleButton.FontFace = theme.Font;
+		moduleButton.Parent = children;
+
+		local gradient = Instance.new("UIGradient");
+		gradient.Rotation = 90;
+		gradient.Enabled = false;
+		gradient.Parent = moduleButton;
+
+		local moduleChildren = Instance.new("Frame");
+		moduleChildren.Name = moduleSettings.Name .. "Children";
+		moduleChildren.Size = UDim2.new(1, 0, 0, 0);
+		moduleChildren.BackgroundColor3 = color.Darken(theme.Main, 0.02);
+		moduleChildren.BorderSizePixel = 0;
+		moduleChildren.Visible = false;
+		moduleChildren.Parent = children;
+
+		moduleapi.Children = moduleChildren;
+
+		local windowList = Instance.new("UIListLayout");
+		windowList.SortOrder = Enum.SortOrder.LayoutOrder;
+		windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+		windowList.Parent = moduleChildren;
+
+		local divider = Instance.new("Frame");
+		divider.Name = "Divider";
+		divider.Size = UDim2.new(1, 0, 0, 1);
+		divider.Position = UDim2.new(0, 0, 1, -1);
+		divider.BackgroundColor3 = Color3.new(0.19, 0.19, 0.19);
+		divider.BackgroundTransparency = 0.52;
+		divider.BorderSizePixel = 0;
+		divider.Visible = false;
+		divider.Parent = moduleButton;
+
+		moduleSettings.Function = moduleSettings.Function or function() end
+
+		AddMaid(moduleapi);
+
+		function moduleapi:Toggle(multiple)
+			if libraryapi.ThreadFix then
+				setthreadidentity(8);
+			end
+
+			self.Enabled = not self.Enabled;
+			divider.Visible = self.Enabled;
+			gradient.Enabled = self.Enabled;
+
+			moduleButton.TextColor3 = (hovered or moduleChildren.Visible) and theme.Text or color.Darken(theme.Text, 0.16)
+			moduleButton.BackgroundColor3 = (hovered or moduleChildren.Visible) and color.Lighten(theme.Main, 0.02) or theme.Main
+
+			if not self.Enabled then -- clear connections
+				for _, v in self.Connections do
+					v:Disconnect();
+				end
+				table.clear(self.Connections);
+			end
+
+			task.spawn(moduleSettings.Function, self.Enabled);
+		end
+
+		for i, v in components do
+			moduleapi["Create" .. i] = function(_, optionSettings)
+				return v(optionSettings, moduleChildren, moduleapi)
+			end
+		end
+
+		moduleButton.MouseEnter:Connect(function()
+			hovered = true;
+
+			if not moduleapi.Enabled and not moduleChildren.Visible then
+				moduleButton.TextColor3 = theme.Text;
+				moduleButton.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+			end
+		end)
+		moduleButton.MouseLeave:Connect(function()
+			hovered = false;
+
+			if not moduleapi.Enabled and not moduleChildren.Visible then
+				moduleButton.TextColor3 = color.Darken(theme.Text, 0.16);
+				moduleButton.BackgroundColor3 = theme.Main;
+			end
+		end)
+		moduleButton.MouseButton1Click:Connect(function()
+			moduleapi:Toggle();
+		end)
+		moduleButton.MouseButton2Click:Connect(function()
+			moduleChildren.Visible = not moduleChildren.Visible;
+		end)
+
+		if inputService.TouchEnabled then -- if on mobile
+			local heldbutton = false
+
+			moduleButton.MouseButton1Down:Connect(function()
+				heldbutton = true
+
+				local holdTime, holdPos = tick(), inputService:GetMouseLocation()
+
+				repeat
+					heldbutton = (inputService:GetMouseLocation() - holdPos).Magnitude < 3;
+					task.wait();
+				until (tick() - holdTime) > 1 or not heldbutton or not clickFrame.Visible
+				
+				if heldbutton and clickFrame.Visible then
+					if libraryapi.ThreadFix then
+						setthreadidentity(8)
+					end
+
+					moduleChildren.Visible = not moduleChildren.Visible;
+				end
+			end)
+
+			moduleButton.MouseButton1Up:Connect(function()
+				heldbutton = false
+			end)
+		end
+
+		windowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			if libraryapi.ThreadFix then
+				setthreadidentity(8);
+			end
+
+			moduleChildren.Size = UDim2.new(1, 0, 0, windowList.AbsoluteContentSize.Y / scale.Scale);
+		end)
+
+		moduleapi.Object = moduleButton;
+		libraryapi.Modules[moduleSettings.Name] = moduleapi;
+
+		local sorting = {}
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
+	end
+
+	function categoryapi:Expand()
+		self.Expanded = not self.Expanded;
+
+		children.Visible = self.Expanded;
 		arrow.Rotation = self.Expanded and 0 or 180;
 		window.Size = UDim2.fromOffset(220, self.Expanded and math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601) or 41);
-		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
+		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible;
 	end
 
 	-- arrow button
@@ -748,7 +1069,7 @@ function library:CreateCategory(categorySettings)
 	return categoryapi
 end
 
-function library:Load()
+function libraryapi:Load()
 	local saveCheck = true
 
 	-- if downloader exists | delete
@@ -789,7 +1110,7 @@ function library:Load()
 		self.BayaButton = button;
 		
 		button.MouseButton1Click:Connect(function()
-			if library.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
+			if libraryapi.Windows.Draggable[button].CanClick ~= true then return end -- make sure CanClick true before running
 
 			if self.ThreadFix then
 				setthreadidentity(8);
@@ -799,7 +1120,7 @@ function library:Load()
 			tooltip.Visible = false;
 		end)
 
-		library:CreateNotification("Baya UI Loaded", "Press button to toggle!", 5);
+		libraryapi:CreateNotification("Baya UI Loaded", "Press button to toggle!", 5);
 
 		if tween.Tween then
 			local tweenInfo = TweenInfo.new(
@@ -818,11 +1139,11 @@ function library:Load()
 	else
 		local concattedKeybinds = table.concat(self.Keybinds.Interact, ", ")
 
-		library:CreateNotification("Baya UI Loaded", "Press " .. concattedKeybinds .. " to toggle!", 5)
+		libraryapi:CreateNotification("Baya UI Loaded", "Press " .. concattedKeybinds .. " to toggle!", 5)
 	end
 end
 
-function library:CreateNotification(title, text, duration, type)
+function libraryapi:CreateNotification(title, text, duration, type)
 	task.delay(0, function()
 		if self.ThreadFix then
 			setthreadidentity(8);
@@ -926,7 +1247,7 @@ function library:CreateNotification(title, text, duration, type)
 	end)
 end
 
-function library:Remove(obj)
+function libraryapi:Remove(obj)
 	local tab = self.Categories
 
 	if tab and tab[obj] then
@@ -950,8 +1271,8 @@ function library:Remove(obj)
 	end
 end
 
-function library:Uninject()
-	library.Loaded = nil
+function libraryapi:Uninject()
+	libraryapi.Loaded = nil
 
 	for _, v in self.Categories do
 		if v.Type == "Overlay" and v.Button.Enabled then
@@ -959,32 +1280,32 @@ function library:Uninject()
 		end
 	end
 
-	for _, v in library.Connections do
+	for _, v in libraryapi.Connections do
 		pcall(function()
 			v:Disconnect()
 		end)
 	end
 
-	if library.ThreadFix then
+	if libraryapi.ThreadFix then
 		setthreadidentity(8)
 		clickFrame.Visible = false
 	end
 
-	library.gui:ClearAllChildren()
-	library.gui:Destroy()
+	libraryapi.gui:ClearAllChildren()
+	libraryapi.gui:Destroy()
 
-	table.clear(library.Libraries)
+	table.clear(libraryapi.Libraries)
 
-	LoopClean(library)
+	LoopClean(libraryapi)
 
-	shared.library = nil
+	shared.libraryapi = nil
 end
 
 -- clean
-library:Clean(gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+libraryapi:Clean(gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 	scale.Scale = math.max(gui.AbsoluteSize.X / 1920, 0.6);
 end))
-library:Clean(scale:GetPropertyChangedSignal("Scale"):Connect(function()
+libraryapi:Clean(scale:GetPropertyChangedSignal("Scale"):Connect(function()
 	scaledFrame.Size = UDim2.fromScale(1 / scale.Scale, 1 / scale.Scale);
 	-- reset scaling
 	for _, obj in scaledFrame:GetDescendants() do
@@ -994,22 +1315,22 @@ library:Clean(scale:GetPropertyChangedSignal("Scale"):Connect(function()
 		end
 	end
 	-- re-position draggable
-	for window, _ in library.Windows.Draggable do
-		local x = math.clamp(window.Position.X.Offset, 0, (window.Parent.AbsoluteSize.X - window.AbsoluteSize.X) / library.gui.ScaledFrame.UIScale.Scale)
-		local y = math.clamp(window.Position.Y.Offset, 0, (window.Parent.AbsoluteSize.Y - window.AbsoluteSize.Y) / library.gui.ScaledFrame.UIScale.Scale)
+	for window, _ in libraryapi.Windows.Draggable do
+		local x = math.clamp(window.Position.X.Offset, 0, (window.Parent.AbsoluteSize.X - window.AbsoluteSize.X) / libraryapi.gui.ScaledFrame.UIScale.Scale)
+		local y = math.clamp(window.Position.Y.Offset, 0, (window.Parent.AbsoluteSize.Y - window.AbsoluteSize.Y) / libraryapi.gui.ScaledFrame.UIScale.Scale)
 					
 		window.Position = UDim2.fromOffset(x, y);
 	end
 end))
 
 -- gui interaction
-library:Clean(inputService.InputBegan:Connect(function(inputObj)
+libraryapi:Clean(inputService.InputBegan:Connect(function(inputObj)
 	if not inputService:GetFocusedTextBox() and inputObj.KeyCode ~= Enum.KeyCode.Unknown then
-		table.insert(library.Keybinds.Held, inputObj.KeyCode.Name);
+		table.insert(libraryapi.Keybinds.Held, inputObj.KeyCode.Name);
 
 		-- if gui interact keybind is pressed
-		if CheckKeybinds(library.Keybinds.Held, library.Keybinds.Interact, inputObj.KeyCode.Name) then
-			if library.ThreadFix then
+		if CheckKeybinds(libraryapi.Keybinds.Held, libraryapi.Keybinds.Interact, inputObj.KeyCode.Name) then
+			if libraryapi.ThreadFix then
 				setthreadidentity(8);
 			end
 
@@ -1019,11 +1340,11 @@ library:Clean(inputService.InputBegan:Connect(function(inputObj)
 	end
 end))
 
-library:Clean(inputService.InputEnded:Connect(function(inputObj)
-	local index = table.find(library.Keybinds.Held, inputObj.KeyCode.Name)
+libraryapi:Clean(inputService.InputEnded:Connect(function(inputObj)
+	local index = table.find(libraryapi.Keybinds.Held, inputObj.KeyCode.Name)
 	if index then
-		table.remove(library.Keybinds.Held, index)
+		table.remove(libraryapi.Keybinds.Held, index)
 	end
 end))
 
-return library
+return libraryapi
