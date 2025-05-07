@@ -430,7 +430,7 @@ components = {
 			Category = api.Button.Name;
 			Running = false;
 		}
-		
+
 		local hovered = false;
 
 		local button = Instance.new("TextButton");
@@ -439,7 +439,7 @@ components = {
 		button.BackgroundColor3 = theme.Main;
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
-		button.Text = '            ' .. optionSettings.Name;
+		button.Text = "            " .. optionSettings.Name;
 		button.TextXAlignment = Enum.TextXAlignment.Left;
 		button.TextColor3 = color.Darken(theme.Text, 0.16);
 		button.TextSize = 14;
@@ -452,18 +452,18 @@ components = {
 		gradient.Rotation = 90;
 		gradient.Enabled = false;
 		gradient.Parent = button;
-		
+
 		moduleapi.Children = children;
 		moduleapi.Object = button
-		
+
 		optionSettings.Function = optionSettings.Function or function() end
 
 		AddMaid(moduleapi);
-		
+
 		function moduleapi:Click(multiple)
 			if moduleapi.Running ~= false then return end
 			moduleapi.Running = true
-			
+
 			if libraryapi.ThreadFix then
 				setthreadidentity(8);
 			end
@@ -473,11 +473,11 @@ components = {
 
 			moduleapi.Object.TextColor3 = moduleapi.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
 			moduleapi.Object.BackgroundColor3 = moduleapi.Enabled and color.Lighten(theme.Main, 0.02) or theme.Main;
-			
+
 			task.spawn(optionSettings.Function, self.Enabled);
-			
+
 			task.wait(.02)
-			
+
 			self.Enabled = false;
 			gradient.Enabled = false;
 
@@ -489,14 +489,14 @@ components = {
 			end
 
 			table.clear(self.Connections);
-			
+
 			moduleapi.Running = false
 		end
 
 		button.MouseEnter:Connect(function()
 			hovered = true;
 
-			if not moduleapi.Enabled and not children.Visible then
+			if not moduleapi.Enabled then
 				button.TextColor3 = theme.Text;
 				button.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
 			end
@@ -504,7 +504,7 @@ components = {
 		button.MouseLeave:Connect(function()
 			hovered = false;
 
-			if not moduleapi.Enabled and not children.Visible then
+			if not moduleapi.Enabled then
 				button.TextColor3 = color.Darken(theme.Text, 0.16);
 				button.BackgroundColor3 = theme.Main;
 			end
@@ -512,9 +512,119 @@ components = {
 		button.MouseButton1Click:Connect(function()
 			moduleapi:Click();
 		end)
-		
+
 		moduleapi.Object = button;
 		libraryapi.Modules[button.Name] = moduleapi;
+
+		local sorting = {}
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
+	end;
+	Toggle = function(optionSettings, children, api)
+		local moduleapi = {
+			Type = 'Toggle';
+			Category = api.Button.Name;
+			Enabled = false;
+		}
+
+		local hovered = false
+
+		local toggle = Instance.new("TextButton");
+		toggle.Name = optionSettings.Name .. "Toggle";
+		toggle.Size = UDim2.new(1, 0, 0, 30);
+		toggle.BackgroundColor3 = theme.Main;
+		toggle.BorderSizePixel = 0;
+		toggle.AutoButtonColor = false;
+		toggle.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		toggle.Text = "            " .. optionSettings.Name;
+		toggle.TextXAlignment = Enum.TextXAlignment.Left;
+		toggle.TextColor3 = color.Darken(theme.Text, 0.16);
+		toggle.TextSize = 14;
+		toggle.FontFace = theme.Font;
+		toggle.Parent = children;
+
+		local knobHolder = Instance.new("Frame");
+		knobHolder.Name = "Knob";
+		knobHolder.Size = UDim2.fromOffset(22, 12);
+		knobHolder.Position = UDim2.new(1, -30, 0, 9);
+		knobHolder.BackgroundColor3 = color.Lighten(theme.Main, 0.14);
+		knobHolder.Parent = toggle;
+
+		local knob = knobHolder:Clone();
+		knob.Size = UDim2.fromOffset(8, 8);
+		knob.Position = UDim2.fromOffset(2, 2);
+		knob.BackgroundColor3 = theme.Main;
+		knob.Parent = knobHolder;
+
+		optionSettings.Function = optionSettings.Function or function() end;
+		
+		AddMaid(moduleapi);
+
+		function moduleapi:Toggle()
+			self.Enabled = not self.Enabled;
+
+			tween:Tween(knobHolder, theme.Tween, {
+				BackgroundColor3 = self.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or (hovered and color.Lighten(theme.Main, 0.37) or color.Lighten(theme.Main, 0.14))
+			});
+			tween:Tween(knob, theme.Tween, {
+				Position = UDim2.fromOffset(self.Enabled and 12 or 2, 2)
+			});
+			
+			if not self.Enabled then
+				for _, v in self.Connections do
+					v:Disconnect();
+				end
+
+				table.clear(self.Connections);
+			end
+
+			optionSettings.Function(self.Enabled);
+		end
+
+		toggle.MouseEnter:Connect(function()
+			hovered = true;
+
+			if not moduleapi.Enabled then
+				tween:Tween(knobHolder, theme.Tween, {
+					BackgroundColor3 = color.Lighten(theme.Main, 0.37)
+				});
+				
+				toggle.TextColor3 = theme.Text;
+				toggle.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+			end
+		end)
+		toggle.MouseLeave:Connect(function()
+			hovered = false;
+
+			if not moduleapi.Enabled then
+				tween:Tween(knobHolder, theme.Tween, {
+					BackgroundColor3 = color.Lighten(theme.Main, 0.14)
+				});
+				
+				toggle.TextColor3 = color.Darken(theme.Text, 0.16);
+				toggle.BackgroundColor3 = theme.Main;
+			end
+		end)
+		toggle.MouseButton1Click:Connect(function()
+			moduleapi:Toggle();
+		end)
+
+		moduleapi.Object = toggle;
+		libraryapi.Modules[toggle.Name] = moduleapi;
 
 		local sorting = {}
 		for _, v in libraryapi.Modules do
