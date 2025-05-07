@@ -49,7 +49,7 @@ local assets = {
 	["Baya/UIAssets/ExpandUp.png"] = "rbxassetid://110148963103901";
 	["Baya/UIAssets/ActionIcon.png"] = "rbxassetid://129077738159596";
 	["Baya/UIAssets/PrayerIcon.png"] = "rbxassetid://112615257443345";
-	["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://120654586984889";
+	["Baya/UIAssets/BayaLogo.png"] = "rbxassetid://71142378499430"; 
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
