@@ -137,53 +137,6 @@ local function SetDownloadMessage(text)
 	end
 end
 
--- create mobile
-local function CreateMobileButton(buttonapi, position) -- REMOVE?
-	local heldbutton = false
-
-	local button = Instance.new('TextButton')
-	button.Size = UDim2.fromOffset(40, 40)
-	button.Position = UDim2.fromOffset(position.X, position.Y)
-	button.AnchorPoint = Vector2.new(0.5, 0.5)
-	button.BackgroundColor3 = buttonapi.Enabled and Color3.new(0, 0.7, 0) or Color3.new()
-	button.BackgroundTransparency = 0.5
-	button.Text = buttonapi.Name
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.TextScaled = true
-	button.Font = Enum.Font.Gotham
-	button.Parent = libraryapi.gui
-
-	local buttonconstraint = Instance.new('UITextSizeConstraint')
-	buttonconstraint.MaxTextSize = 16
-	buttonconstraint.Parent = button
-
-	button.MouseButton1Down:Connect(function()
-		heldbutton = true
-
-		local holdtime, holdpos = tick(), inputService:GetMouseLocation()
-		repeat
-			heldbutton = (inputService:GetMouseLocation() - holdpos).Magnitude < 6
-			task.wait()
-		until (tick() - holdtime) > 1 or not heldbutton
-
-		if heldbutton then
-			buttonapi.Bind = {}
-			button:Destroy()
-		end
-	end)
-
-	button.MouseButton1Up:Connect(function()
-		heldbutton = false
-	end)
-
-	button.MouseButton1Click:Connect(function()
-		buttonapi:Toggle()
-		button.BackgroundColor3 = buttonapi.Enabled and Color3.new(0, 0.7, 0) or Color3.new()
-	end)
-
-	buttonapi.Bind = {Button = button}
-end
-
 -- get asset
 local function DownloadFile(path, func)
 	if not isfile(path) then
@@ -342,7 +295,11 @@ local function Dragify(gui, window)
 			local dragPosition = Vector2.new(
 				gui.AbsolutePosition.X - inputObj.Position.X,
 				gui.AbsolutePosition.Y - inputObj.Position.Y + guiService:GetGuiInset().Y
-			) / libraryapi.gui.ScaledFrame.UIScale.Scale
+			) 
+			
+			if gui:IsDescendantOf(libraryapi.gui.ScaledFrame) then
+				dragPosition /= libraryapi.gui.ScaledFrame.UIScale.Scale
+			end
 
 			local changed = inputService.InputChanged:Connect(function(input)
 				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not libraryapi.Windows.Dragging or libraryapi.Windows.Dragging == gui) then
@@ -354,9 +311,23 @@ local function Dragify(gui, window)
 						dragPosition = (dragPosition // 3) * 3;
 						position = (position // 3) * 3;
 					end
+					
+					local posX = position.X
+					local posY = position.Y
+					
+					local maxX = (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) 
+					local maxY = (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) 
+			
+					if gui:IsDescendantOf(libraryapi.gui.ScaledFrame) then
+						posX /= libraryapi.gui.ScaledFrame.UIScale.Scale
+						posY /= libraryapi.gui.ScaledFrame.UIScale.Scale
+						
+						maxX /= libraryapi.gui.ScaledFrame.UIScale.Scale
+						maxY /= libraryapi.gui.ScaledFrame.UIScale.Scale
+					end
 
-					local x = math.clamp((position.X / libraryapi.gui.ScaledFrame.UIScale.Scale) + dragPosition.X, 0, (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) / libraryapi.gui.ScaledFrame.UIScale.Scale)
-					local y = math.clamp((position.Y / libraryapi.gui.ScaledFrame.UIScale.Scale) + dragPosition.Y, 0, (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) / libraryapi.gui.ScaledFrame.UIScale.Scale)
+					local x = math.clamp((posX) + dragPosition.X, 0, maxX)
+					local y = math.clamp((posY) + dragPosition.Y, 0, maxY)
 
 					gui.Position = UDim2.fromOffset(x, y);
 				end
@@ -990,19 +961,13 @@ function libraryapi:Load()
 	self.Loaded = saveCheck
 
 	if inputService.TouchEnabled then -- mobile
-		-- create click gui
-		local mobileFrame = Instance.new("Frame");
-		mobileFrame.Name = "MobileFrame";
-		mobileFrame.Size = UDim2.fromScale(1, 1); 
-		mobileFrame.BackgroundTransparency = 1;
-		mobileFrame.Parent = scaledFrame
-
 		local button = Instance.new("TextButton");
 		button.Size = UDim2.fromOffset(32, 32);
+		button.Position = UDim2.new(0, 4, 1, -35);
 		button.BackgroundColor3 = Color3.new();
 		button.BackgroundTransparency = 0.5;
 		button.Text = "";
-		button.Parent = mobileFrame;
+		button.Parent = gui;
 
 		Dragify(button);
 
