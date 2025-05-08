@@ -653,20 +653,6 @@ components = {
 			Value = optionSettings.List[1] or "None",
 			Index = 0
 		}
-		
-		local toggle = Instance.new("TextButton");
-		toggle.Name = optionSettings.Name .. "Toggle";
-		toggle.Size = UDim2.new(1, 0, 0, 30);
-		toggle.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0)
-		toggle.BorderSizePixel = 0;
-		toggle.AutoButtonColor = false;
-		toggle.Visible = optionSettings.Visible == nil or optionSettings.Visible;
-		toggle.Text = "            " .. optionSettings.Name;
-		toggle.TextXAlignment = Enum.TextXAlignment.Left;
-		toggle.TextColor3 = color.Darken(theme.Text, 0.16);
-		toggle.TextSize = 14;
-		toggle.FontFace = theme.Font;
-		toggle.Parent = children;
 
 		local dropdown = Instance.new("TextButton");
 		dropdown.Name = optionSettings.Name .. "Dropdown";
@@ -845,12 +831,225 @@ components = {
 
 		return moduleapi
 	end;
+	Slider = function(optionSettings, children, api)
+		local moduleapi = {
+			Type = 'Slider';
+			Category = api.Button.Name;
+			Value = optionSettings.Default or optionSettings.Min;
+			Max = optionSettings.Max;
+		}
+
+		local slider = Instance.new("TextButton");
+		slider.Name = optionSettings.Name .. "Slider";
+		slider.Size = UDim2.new(1, 0, 0, 50);
+		slider.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0);
+		slider.BorderSizePixel = 0;
+		slider.AutoButtonColor = false;
+		slider.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		slider.Text = "";
+		slider.Parent = children;
+
+		AddTooltip(slider, optionSettings.Tooltip)
+
+		local title = Instance.new("TextLabel");
+		title.Name = "Title";
+		title.Size = UDim2.fromOffset(60, 30);
+		title.Position = UDim2.fromOffset(10, 2);
+		title.BackgroundTransparency = 1;
+		title.Text = optionSettings.Name;
+		title.TextXAlignment = Enum.TextXAlignment.Left;
+		title.TextColor3 = color.Darken(theme.Text, 0.16);
+		title.TextSize = 11;
+		title.FontFace = theme.Font;
+		title.Parent = slider;
+
+		local valueButton = Instance.new("TextButton");
+		valueButton.Name = "Value";
+		valueButton.Size = UDim2.fromOffset(60, 15);
+		valueButton.Position = UDim2.new(1, -69, 0, 9);
+		valueButton.BackgroundTransparency = 1;
+		valueButton.Text = moduleapi.Value .. (optionSettings.Suffix and " " .. (type(optionSettings.Suffix) == "function" and optionSettings.Suffix(moduleapi.Value) or optionSettings.Suffix) or "");
+		valueButton.TextXAlignment = Enum.TextXAlignment.Right;
+		valueButton.TextColor3 = color.Darken(theme.Text, 0.16);
+		valueButton.TextSize = 11;
+		valueButton.FontFace = theme.Font;
+		valueButton.Parent = slider;
+
+		local valueBox = Instance.new("TextBox");
+		valueBox.Name = "Box";
+		valueBox.Size = valueButton.Size;
+		valueBox.Position = valueButton.Position;
+		valueBox.BackgroundTransparency = 1;
+		valueBox.Visible = false;
+		valueBox.Text = moduleapi.Value;
+		valueBox.TextXAlignment = Enum.TextXAlignment.Right;
+		valueBox.TextColor3 = color.Darken(theme.Text, 0.16);
+		valueBox.TextSize = 11;
+		valueBox.FontFace = theme.Font;
+		valueBox.ClearTextOnFocus = false;
+		valueBox.Parent = slider;
+
+		local bg = Instance.new("Frame");
+		bg.Name = "Slider";
+		bg.Size = UDim2.new(1, -20, 0, 2);
+		bg.Position = UDim2.fromOffset(10, 37);
+		bg.BackgroundColor3 = color.Lighten(theme.Main, 0.034);
+		bg.BorderSizePixel = 0;
+		bg.Parent = slider;
+
+		local fill = bg:Clone();
+		fill.Name = "Fill";
+		fill.Size = UDim2.fromScale(math.clamp((moduleapi.Value - optionSettings.Min) / optionSettings.Max, 0.04, 0.96), 1)
+		fill.Position = UDim2.new()
+		fill.BackgroundColor3 = Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value)
+		fill.Parent = bg
+
+		local knobHolder = Instance.new("Frame");
+		knobHolder.Name = "Knob";
+		knobHolder.Size = UDim2.fromOffset(24, 4);
+		knobHolder.Position = UDim2.fromScale(1, 0.5);
+		knobHolder.AnchorPoint = Vector2.new(0.5, 0.5);
+		knobHolder.BackgroundColor3 = slider.BackgroundColor3;
+		knobHolder.BorderSizePixel = 0;
+		knobHolder.Parent = fill;
+
+		local knob = Instance.new("Frame");
+		knob.Name = "Knob";
+		knob.Size = UDim2.fromOffset(14, 14);
+		knob.Position = UDim2.fromScale(0.5, 0.5);
+		knob.AnchorPoint = Vector2.new(0.5, 0.5);
+		knob.BackgroundColor3 = Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value);
+		knob.Parent = knobHolder;
+
+		optionSettings.Function = optionSettings.Function or function() end
+		optionSettings.Decimal = optionSettings.Decimal or 1
+
+		AddMaid(moduleapi);
+
+		function moduleapi:Color(hue, sat, val)
+			fill.BackgroundColor3 = Color3.fromHSV(hue, sat, val)
+			knob.BackgroundColor3 = fill.BackgroundColor3
+		end
+
+		function moduleapi:SetValue(value, pos, final)
+			if tonumber(value) == math.huge or value ~= value then return end
+
+			local check = self.Value ~= value
+
+			self.Value = value
+
+			tween:Tween(fill, theme.Tween, {
+				Size = UDim2.fromScale(math.clamp(pos or math.clamp(value / optionSettings.Max, 0, 1), 0.04, 0.96), 1)
+			})
+
+			valueButton.Text = self.Value .. (optionSettings.Suffix and " " .. (type(optionSettings.Suffix) == "function" and optionSettings.Suffix(self.Value) or optionSettings.Suffix) or "")
+			
+			if check or final then
+				optionSettings.Function(value, final)
+			end
+
+			for _, v in self.Connections do
+				v:Disconnect();
+			end
+
+			table.clear(self.Connections);
+		end
+
+		slider.InputBegan:Connect(function(inputObj)
+			if
+				(inputObj.UserInputType == Enum.UserInputType.MouseButton1 or inputObj.UserInputType == Enum.UserInputType.Touch)
+				and (inputObj.Position.Y - slider.AbsolutePosition.Y) > (20 * scale.Scale)
+			then
+				local newPosition = math.clamp((inputObj.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
+				
+				moduleapi:SetValue(math.floor((optionSettings.Min + (optionSettings.Max - optionSettings.Min) * newPosition) * optionSettings.Decimal) / optionSettings.Decimal, newPosition)
+				
+				local lastValue = moduleapi.Value
+				local lastPosition = newPosition
+		
+				local changed = inputService.InputChanged:Connect(function(input)
+					if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) then
+						local newPosition = math.clamp((input.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
+					
+						moduleapi:SetValue(math.floor((optionSettings.Min + (optionSettings.Max - optionSettings.Min) * newPosition) * optionSettings.Decimal) / optionSettings.Decimal, newPosition)
+						
+						lastValue = moduleapi.Value
+						lastPosition = newPosition
+					end
+				end)
+		
+				local ended
+				ended = inputObj.Changed:Connect(function()
+					if inputObj.UserInputState == Enum.UserInputState.End then
+						if changed then
+							changed:Disconnect()
+						end
+						if ended then
+							ended:Disconnect()
+						end
+						moduleapi:SetValue(lastValue, lastPosition, true)
+					end
+				end)
+			end
+		end)
+
+		slider.MouseEnter:Connect(function()
+			tween:Tween(knob, theme.Tween, {
+				Size = UDim2.fromOffset(16, 16)
+			})
+		end)
+		slider.MouseLeave:Connect(function()
+			tween:Tween(knob, theme.Tween, {
+				Size = UDim2.fromOffset(14, 14)
+			})
+		end)
+
+		valueButton.MouseButton1Click:Connect(function()
+			valueButton.Visible = false
+
+			valueBox.Visible = true
+			valueBox.Text = moduleapi.Value
+
+			valueBox:CaptureFocus()
+		end)
+
+		valueBox.FocusLost:Connect(function(enter)
+			valueButton.Visible = true
+
+			valueBox.Visible = false
+
+			if enter and tonumber(valueBox.Text) then
+				moduleapi:SetValue(tonumber(valueBox.Text), nil, true)
+			end
+		end)
+		
+		moduleapi.Object = slider
+		libraryapi.Modules[slider.Name] = moduleapi;
+
+		local sorting = {}
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
+	end;
 }
 
 libraryapi.Components = setmetatable(components, {
 	__newindex = function(self, ind, func)
 		for _, v in libraryapi.Modules do
-			rawset(v, 'Create'..ind, function(_, settings)
+			rawset(v, "Create" .. ind, function(_, settings)
 				return func(settings, v.Children, v)
 			end)
 		end
