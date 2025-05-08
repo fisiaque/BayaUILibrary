@@ -1044,6 +1044,109 @@ components = {
 
 		return moduleapi
 	end;
+	TextBox = function(optionSettings, children, api)
+		local moduleapi = {
+			Type = "TextBox",
+			Category = api.Button.Name;
+			Value = optionSettings.Default or "",
+			Index = 0
+		}
+
+		local textBox = Instance.new("TextButton");
+		textBox.Name = optionSettings.Name .. "TextBox";
+		textBox.Size = UDim2.new(1, 0, 0, 58);
+		textBox.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0);
+		textBox.BorderSizePixel = 0;
+		textBox.AutoButtonColor = false;
+		textBox.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		textBox.Text = "";
+		textBox.Parent = children;
+
+		AddTooltip(textBox, optionSettings.Tooltip)
+
+		local title = Instance.new("TextLabel");
+		title.Size = UDim2.new(1, -10, 0, 20);
+		title.Position = UDim2.fromOffset(10, 3);
+		title.BackgroundTransparency = 1;
+		title.Text = optionSettings.Name;
+		title.TextXAlignment = Enum.TextXAlignment.Left;
+		title.TextColor3 = theme.Text;
+		title.TextSize = 12;
+		title.FontFace = theme.Font;
+		title.Parent = textBox;
+
+		local bg = Instance.new("Frame");
+		bg.Name = "Background";
+		bg.Size = UDim2.new(1, -20, 0, 29);
+		bg.Position = UDim2.fromOffset(10, 23);
+		bg.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+		bg.Parent = textBox;
+
+		local box = Instance.new("TextBox");
+		box.Size = UDim2.new(1, -8, 1, 0);
+		box.Position = UDim2.fromOffset(8, 0);
+		box.BackgroundTransparency = 1;
+		box.Text = optionSettings.Default or "";
+		box.PlaceholderText = optionSettings.Placeholder or "Click to set";
+		box.TextXAlignment = Enum.TextXAlignment.Left;
+		box.TextColor3 = color.Darken(theme.Text, 0.16);
+		box.PlaceholderColor3 = color.Darken(theme.Text, 0.31);
+		box.TextSize = 12;
+		box.FontFace = theme.Font;
+		box.ClearTextOnFocus = false;
+		box.Parent = bg;
+
+		optionSettings.Function = optionSettings.Function or function() end
+
+		AddMaid(moduleapi);
+
+		function moduleapi:SetValue(val, enter)
+			self.Value = val;
+
+			box.Text = val;
+
+			local args = {val, enter};
+			optionSettings.Function(args);
+
+			for _, v in self.Connections do
+				v:Disconnect();
+			end
+
+			table.clear(self.Connections);
+		end
+		
+		textBox.MouseButton1Click:Connect(function()
+			box:CaptureFocus()
+		end)
+
+		box.FocusLost:Connect(function(enter)
+			moduleapi:SetValue(box.Text, enter)
+		end)
+		box:GetPropertyChangedSignal('Text'):Connect(function()
+			moduleapi:SetValue(box.Text)
+		end)
+		
+		moduleapi.Object = textBox
+		libraryapi.Modules[textBox.Name] = moduleapi;
+
+		local sorting = {}
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
+	end;
 }
 
 libraryapi.Components = setmetatable(components, {
