@@ -436,7 +436,7 @@ components = {
 		local button = Instance.new("TextButton");
 		button.Name = optionSettings.Name;
 		button.Size = UDim2.fromOffset(220, 40);
-		button.BackgroundColor3 = theme.Main;
+		button.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0)
 		button.BorderSizePixel = 0;
 		button.AutoButtonColor = false;
 		button.Text = "            " .. optionSettings.Name;
@@ -546,7 +546,7 @@ components = {
 		local toggle = Instance.new("TextButton");
 		toggle.Name = optionSettings.Name .. "Toggle";
 		toggle.Size = UDim2.new(1, 0, 0, 30);
-		toggle.BackgroundColor3 = theme.Main;
+		toggle.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0)
 		toggle.BorderSizePixel = 0;
 		toggle.AutoButtonColor = false;
 		toggle.Visible = optionSettings.Visible == nil or optionSettings.Visible;
@@ -627,6 +627,205 @@ components = {
 
 		moduleapi.Object = toggle;
 		libraryapi.Modules[toggle.Name] = moduleapi;
+
+		local sorting = {}
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
+	end;
+	Dropdown = function(optionSettings, children, api)
+		local moduleapi = {
+			Type = "Dropdown",
+			Category = api.Button.Name;
+			Value = optionSettings.List[1] or "None",
+			Index = 0
+		}
+		
+		local toggle = Instance.new("TextButton");
+		toggle.Name = optionSettings.Name .. "Toggle";
+		toggle.Size = UDim2.new(1, 0, 0, 30);
+		toggle.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0)
+		toggle.BorderSizePixel = 0;
+		toggle.AutoButtonColor = false;
+		toggle.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		toggle.Text = "            " .. optionSettings.Name;
+		toggle.TextXAlignment = Enum.TextXAlignment.Left;
+		toggle.TextColor3 = color.Darken(theme.Text, 0.16);
+		toggle.TextSize = 14;
+		toggle.FontFace = theme.Font;
+		toggle.Parent = children;
+
+		local dropdown = Instance.new("TextButton");
+		dropdown.Name = optionSettings.Name .. "Dropdown";
+		dropdown.Size = UDim2.new(1, 0, 0, 40);
+		dropdown.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0);
+		dropdown.BorderSizePixel = 0;
+		dropdown.AutoButtonColor = false;
+		dropdown.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		dropdown.Text = "";
+		dropdown.Parent = children;
+
+		AddTooltip(dropdown, optionSettings.Tooltip or optionSettings.Name)
+
+		local bg = Instance.new("Frame");
+		bg.Name = "Background";
+		bg.Size = UDim2.new(1, -20, 1, -9);
+		bg.Position = UDim2.fromOffset(10, 4);
+		bg.BackgroundColor3 = color.Lighten(theme.Main, 0.034);
+		bg.Parent = dropdown;
+
+		local button = Instance.new("TextButton");
+		button.Name = "Dropdown";
+		button.Size = UDim2.new(1, -2, 1, -2);
+		button.Position = UDim2.fromOffset(1, 1);
+		button.BackgroundColor3 = theme.Main;
+		button.AutoButtonColor = false;
+		button.Text = "";
+		button.Parent = bg;
+
+		local title = Instance.new("TextLabel");
+		title.Name = "Title";
+		title.Size = UDim2.new(1, 0, 0, 29);
+		title.BackgroundTransparency = 1;
+		title.Text = "         " .. optionSettings.Name.." - " .. moduleapi.Value;
+		title.TextXAlignment = Enum.TextXAlignment.Left;
+		title.TextColor3 = color.Darken(theme.Text, 0.16);
+		title.TextSize = 13;
+		title.TextTruncate = Enum.TextTruncate.AtEnd;
+		title.FontFace = theme.Font;
+		title.Parent = button;
+
+		local arrow = Instance.new("ImageLabel");
+		arrow.Name = "Arrow";
+		arrow.Size = UDim2.fromOffset(4, 8);
+		arrow.Position = UDim2.new(1, -17, 0, 11);
+		arrow.BackgroundTransparency = 1;
+		arrow.Image = getcustomasset("Baya/Assets/ExpandRight.png");
+		arrow.ImageColor3 = Color3.fromRGB(140, 140, 140);
+		arrow.Rotation = 90;
+		arrow.Parent = button;
+
+		optionSettings.Function = optionSettings.Function or function() end;
+		
+		AddMaid(moduleapi);
+
+		local dropdownChildren;
+
+		function moduleapi:Change(list)
+			optionSettings.List = list or {};
+			if not table.find(optionSettings.List, self.Value) then
+				self:SetValue(self.Value);
+			end
+		end
+
+		function moduleapi:SetValue(val, mouse)
+			self.Value = table.find(optionSettings.List, val) and val or optionSettings.List[1] or "None";
+
+			title.Text = "         " .. optionSettings.Name .. " - " .. self.Value;
+
+			if dropdownChildren then
+				arrow.Rotation = 90;
+				dropdownChildren:Destroy();
+				dropdownChildren = nil;
+				dropdown.Size = UDim2.new(1, 0, 0, 40);
+			end
+			
+			optionSettings.Function(self.Value, mouse)
+			
+			for _, v in self.Connections do
+				v:Disconnect();
+			end
+
+			table.clear(self.Connections);
+		end
+
+		button.MouseButton1Click:Connect(function()
+			if not dropdownChildren then
+				arrow.Rotation = 270;
+
+				dropdown.Size = UDim2.new(1, 0, 0, 40 + (#optionSettings.List - 1) * 26);
+
+				dropdownChildren = Instance.new("Frame");
+				dropdownChildren.Name = "Children";
+				dropdownChildren.Size = UDim2.new(1, 0, 0, (#optionSettings.List - 1) * 26);
+				dropdownChildren.Position = UDim2.fromOffset(0, 27);
+				dropdownChildren.BackgroundTransparency = 1;
+				dropdownChildren.Parent = button;
+
+				local ind = 0
+
+				for _, v in optionSettings.List do
+					if v == moduleapi.Value then continue end
+
+					local dropdownOption = Instance.new("TextButton");
+					dropdownOption.Name = v .. "Option";
+					dropdownOption.Size = UDim2.new(1, 0, 0, 26);
+					dropdownOption.Position = UDim2.fromOffset(0, ind * 26);
+					dropdownOption.BackgroundColor3 = theme.Main;
+					dropdownOption.BorderSizePixel = 0;
+					dropdownOption.AutoButtonColor = false;
+					dropdownOption.Text = "         " .. v;
+					dropdownOption.TextXAlignment = Enum.TextXAlignment.Left;
+					dropdownOption.TextColor3 = color.Darken(theme.Text, 0.16);
+					dropdownOption.TextSize = 13;
+					dropdownOption.TextTruncate = Enum.TextTruncate.AtEnd;
+					dropdownOption.FontFace = theme.Font;
+					dropdownOption.Parent = dropdownChildren;
+					dropdownOption.MouseEnter:Connect(function()
+						tween:Tween(dropdownOption, theme.Tween, {
+							BackgroundColor3 = color.Lighten(theme.Main, 0.02)
+						});
+					end);
+
+					dropdownOption.MouseLeave:Connect(function()
+						tween:Tween(dropdownOption, theme.Tween, {
+							BackgroundColor3 = theme.Main
+						});
+					end);
+
+					dropdownOption.MouseButton1Click:Connect(function()
+						moduleapi:SetValue(v, true);
+					end);
+
+					ind += 1;
+				end
+			else
+				moduleapi:SetValue(moduleapi.Value, true);
+			end
+		end)
+
+		dropdown.MouseEnter:Connect(function()
+			tween:Tween(bg, theme.Tween, {
+				BackgroundColor3 = color.Lighten(theme.Main, 0.0875)
+			})
+			
+			dropdown.TextColor3 = theme.Text;
+			dropdown.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+		end)
+		dropdown.MouseLeave:Connect(function()
+			tween:Tween(bg, theme.Tween, {
+				BackgroundColor3 = color.Lighten(theme.Main, 0.034)
+			})
+			
+			dropdown.TextColor3 = color.Darken(theme.Text, 0.16);
+			dropdown.BackgroundColor3 = theme.Main;
+		end)
+
+		moduleapi.Object = dropdown;
+		libraryapi.Modules[dropdown.Name] = moduleapi;
 
 		local sorting = {}
 		for _, v in libraryapi.Modules do
@@ -965,6 +1164,7 @@ function libraryapi:CreateCategory(categorySettings)
 	children.Name = "Children";
 	children.Size = UDim2.new(1, 0, 1, -41);
 	children.Position = UDim2.fromOffset(0, 37);
+	children.BackgroundColor3 = color.Darken(theme.Main, 0.02)
 	children.BackgroundTransparency = 1;
 	children.BorderSizePixel = 0;
 	children.Visible = false;
