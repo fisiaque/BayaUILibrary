@@ -20,9 +20,11 @@ Load library:
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))();
 ```
 
-Create GUI:
+Create GUI & Store Library to Global Variable:
 ```lua
-library:CreateGui()
+library:CreateGui();
+
+shared.baya = library;
 ```
 
 Create Category:
