@@ -1575,7 +1575,7 @@ function libraryapi:Load()
 
 	self.Loaded = saveCheck
 
-	shared.Baya = libraryapi
+	shared.baya = libraryapi
 
 	if inputService.TouchEnabled then -- mobile
 		local button = Instance.new("TextButton");
