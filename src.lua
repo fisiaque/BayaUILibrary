@@ -1147,6 +1147,29 @@ components = {
 
 		return moduleapi
 	end;
+	Divider = function(textSettings, children)
+		local divider = Instance.new("Frame");
+		divider.Name = "Divider";
+		divider.Size = UDim2.new(1, 0, 0, 1);
+		divider.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+		divider.BorderSizePixel = 0;
+		divider.Parent = children;
+
+		if textSettings then
+			local label = Instance.new("TextLabel");
+			label.Name = "DividerLabel";
+			label.Size = UDim2.fromOffset(218, 27);
+			label.BackgroundTransparency = 1;
+			label.Text = "          " .. textSettings.Text:upper();
+			label.TextXAlignment = textSettings.Alignment;
+			label.TextColor3 = color.Darken(theme.Text, 0.43);
+			label.TextSize = 9;
+			label.FontFace = theme.Font;
+			label.Parent = children;
+			divider.Position = UDim2.fromOffset(0, 26);
+			divider.Parent = label;
+		end
+	end;
 }
 
 libraryapi.Components = setmetatable(components, {
@@ -1377,6 +1400,10 @@ function libraryapi:CreateGUI()
 		categoryapi.Buttons[categorySettings.Name] = optionapi
 
 		return optionapi
+	end
+
+	function categoryapi:CreateDivider(textSettings)
+		components.Divider(textSettings, children)
 	end
 
 	windowList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()

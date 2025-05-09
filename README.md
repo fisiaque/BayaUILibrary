@@ -15,16 +15,27 @@
 
 **Documentation**:
 
-Load library:
+Load library & Store to Global Variable:
 ```lua
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/fisiaque/BayaUILibrary/main/src.lua", true))();
+shared.baya = library;
 ```
 
-Create GUI & Store Library to Global Variable:
+Create GUI:
 ```lua
-library:CreateGui();
+local main = library:CreateGui();
+```
 
-shared.baya = library;
+Create Divider
+```lua
+--|| Creates a Divider w/ Text
+main:CreateDivider({
+	Text = "Hello World";
+	Alignment = Enum.TextXAlignment.Center;
+})
+
+--|| Creates a Divider for said category i.e main category
+main:CreateDivider()
 ```
 
 Create Category:
