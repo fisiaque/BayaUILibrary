@@ -8,6 +8,7 @@ local libraryapi = {
 	Windows = {
 		Draggable = {};
 	};
+	Tooltips = {};
 	Categories = {};
 	Libraries = {};
 	Modules = {};
@@ -254,6 +255,7 @@ local function AddTooltip(gui, text)
 
 	local optionapi = {
 		Visible = true;
+		Forced = false;
 	}
 
 	local function TooltipMoved(x, y)
@@ -280,6 +282,8 @@ local function AddTooltip(gui, text)
 	gui.MouseLeave:Connect(function()
 		tooltip.Visible = false
 	end)
+
+	libraryapi.Tooltips[gui] = optionapi
 
 	return optionapi
 end
@@ -343,6 +347,12 @@ local function Dragify(gui, window)
 				if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) and (not libraryapi.Windows.Dragging or libraryapi.Windows.Dragging == gui) then
 					libraryapi.Windows.Dragging = gui -- prevents more than 1 window from "stack" dragging
 
+					for _, v in libraryapi.Tooltips do
+						if v.Visible and not v.Forced then
+							v.Visible = false
+						end
+					end
+
 					local position = input.Position;
 					-- snap to grid if left shift held
 					if inputService:IsKeyDown(Enum.KeyCode.LeftShift) then
@@ -383,6 +393,11 @@ local function Dragify(gui, window)
 						task.delay(.25, function()
 							libraryapi.Windows.Draggable[gui].CanClick = true
 						end)
+					end
+					for _, v in libraryapi.Tooltips do
+						if not v.Visible and not v.Forced then
+							v.Visible = true
+						end
 					end
 					if changed then
 						changed:Disconnect()
@@ -994,6 +1009,8 @@ components = {
 		end
 
 		slider.InputBegan:Connect(function(inputObj)
+			if not libraryapi.Windows.Dragging then return end -- makes sure it doesn't change when dragging gui
+
 			if
 				(inputObj.UserInputType == Enum.UserInputType.MouseButton1 or inputObj.UserInputType == Enum.UserInputType.Touch)
 				and (inputObj.Position.Y - slider.AbsolutePosition.Y) > (20 * scale.Scale)
@@ -1320,6 +1337,7 @@ function libraryapi:CreateGUI()
 
 	local window = Instance.new("TextButton");
 	window.Name = "GUICategory";
+	window.Size = UDim2.fromOffset(220, 41);
 	window.Position = UDim2.fromOffset(6, 60);
 	window.BackgroundColor3 = color.Darken(theme.Main, 0.02);
 	window.AutoButtonColor = false
@@ -1446,7 +1464,7 @@ function libraryapi:CreateGUI()
 
 	function categoryapi:CreateInfoPane(categorySettings)
 		local optionapi = {};
-		
+
 		local infoButton = Instance.new("TextButton");
 		infoButton.Name = "Info";
 		infoButton.Size = UDim2.fromOffset(40, 40);
@@ -1499,21 +1517,25 @@ function libraryapi:CreateGUI()
 		infoChildren.Name = "Children";
 		infoChildren.Size = UDim2.new(1, 0, 1, -57);
 		infoChildren.Position = UDim2.fromOffset(0, 41);
-		infoChildren.BackgroundColor3 = theme.Main;
+		infoChildren.BackgroundColor3 = color.Darken(theme.Main, 0.02)
 		infoChildren.BorderSizePixel = 0;
+		infoChildren.ScrollBarThickness = 2;
+		infoChildren.ScrollBarImageTransparency = 0.75;
+		infoChildren.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+		infoChildren.CanvasSize = UDim2.new(0, 0, 1, 0);
 		infoChildren.Parent = infoPane;
 
 		local infoWindowList = Instance.new("UIListLayout");
 		infoWindowList.SortOrder = Enum.SortOrder.LayoutOrder;
 		infoWindowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 		infoWindowList.Parent = infoChildren;
-		
+
 		for i, v in components do
 			optionapi["Create" .. i] = function(_, settings)
 				return v(settings, infoChildren, categoryapi)
 			end
 		end
-		
+
 		infoBack.MouseEnter:Connect(function()
 			infoBack.ImageColor3 = theme.Text;
 		end);
@@ -1523,6 +1545,7 @@ function libraryapi:CreateGUI()
 		infoBack.MouseButton1Click:Connect(function()
 			infoPane.Visible = false;
 			infoTooltip.Visible = true;
+			infoTooltip.Forced = false
 		end);
 		infoButton.MouseEnter:Connect(function()
 			infoIcon.ImageColor3 = theme.Text;
@@ -1532,8 +1555,23 @@ function libraryapi:CreateGUI()
 		end);
 		infoButton.MouseButton1Click:Connect(function()
 			infoTooltip.Visible = false;
+			infoTooltip.Forced = true
 			infoPane.Visible = true;
 		end);
+		
+		infoWindowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			if libraryapi.ThreadFix then
+				setthreadidentity(8)
+			end
+			
+			infoPane.Size = UDim2.fromOffset(220, 45 + infoWindowList.AbsoluteContentSize.Y / scale.Scale)
+			
+			for _, v in categoryapi.Buttons do
+				if v.Icon then
+					v.Object.Text = string.rep(' ', 33 * scale.Scale)..v.Name
+				end
+			end
+		end)
 
 		return optionapi
 	end
@@ -1554,7 +1592,6 @@ function libraryapi:CreateGUI()
 
 	return categoryapi
 end
-
 
 function libraryapi:CreateCategory(categorySettings)
 	local categoryapi = {
