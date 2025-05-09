@@ -480,7 +480,7 @@ components = {
 	Button = function(optionSettings, children, api)
 		local moduleapi = {
 			Enabled = false;
-			Category = api.Button.Name;
+			Category = api.Name or api.Button.Name;
 			Running = false;
 		}
 
@@ -590,7 +590,7 @@ components = {
 	Toggle = function(optionSettings, children, api)
 		local moduleapi = {
 			Type = 'Toggle';
-			Category = api.Button.Name;
+			Category = api.Name or api.Button.Name;
 			Enabled = false;
 		}
 
@@ -626,7 +626,7 @@ components = {
 		knob.Parent = knobHolder;
 
 		optionSettings.Function = optionSettings.Function or function() end;
-		
+
 		AddMaid(moduleapi);
 
 		function moduleapi:Toggle()
@@ -638,7 +638,7 @@ components = {
 			tween:Tween(knob, theme.Tween, {
 				Position = UDim2.fromOffset(self.Enabled and 12 or 2, 2)
 			});
-			
+
 			if not self.Enabled then
 				for _, v in self.Connections do
 					v:Disconnect();
@@ -657,7 +657,7 @@ components = {
 				tween:Tween(knobHolder, theme.Tween, {
 					BackgroundColor3 = color.Lighten(theme.Main, 0.37)
 				});
-				
+
 				toggle.TextColor3 = theme.Text;
 				toggle.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
 			end
@@ -669,7 +669,7 @@ components = {
 				tween:Tween(knobHolder, theme.Tween, {
 					BackgroundColor3 = color.Lighten(theme.Main, 0.14)
 				});
-				
+
 				toggle.TextColor3 = color.Darken(theme.Text, 0.16);
 				toggle.BackgroundColor3 = theme.Main;
 			end
@@ -702,7 +702,7 @@ components = {
 	Dropdown = function(optionSettings, children, api)
 		local moduleapi = {
 			Type = "Dropdown",
-			Category = api.Button.Name;
+			Category = api.Name or api.Button.Name;
 			Value = optionSettings.List[1] or "None",
 			Index = 0
 		}
@@ -758,7 +758,7 @@ components = {
 		arrow.Parent = button;
 
 		optionSettings.Function = optionSettings.Function or function() end;
-		
+
 		AddMaid(moduleapi);
 
 		local dropdownChildren;
@@ -781,9 +781,9 @@ components = {
 				dropdownChildren = nil;
 				dropdown.Size = UDim2.new(1, 0, 0, 40);
 			end
-			
+
 			optionSettings.Function(self.Value, mouse)
-			
+
 			for _, v in self.Connections do
 				v:Disconnect();
 			end
@@ -850,7 +850,7 @@ components = {
 			tween:Tween(bg, theme.Tween, {
 				BackgroundColor3 = color.Lighten(theme.Main, 0.0875)
 			})
-			
+
 			dropdown.TextColor3 = theme.Text;
 			dropdown.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
 		end)
@@ -858,7 +858,7 @@ components = {
 			tween:Tween(bg, theme.Tween, {
 				BackgroundColor3 = color.Lighten(theme.Main, 0.034)
 			})
-			
+
 			dropdown.TextColor3 = color.Darken(theme.Text, 0.16);
 			dropdown.BackgroundColor3 = theme.Main;
 		end)
@@ -887,7 +887,7 @@ components = {
 	Slider = function(optionSettings, children, api)
 		local moduleapi = {
 			Type = 'Slider';
-			Category = api.Button.Name;
+			Category = api.Name or api.Button.Name;
 			Value = optionSettings.Default or optionSettings.Min;
 			Max = optionSettings.Max;
 		}
@@ -996,7 +996,7 @@ components = {
 			})
 
 			valueButton.Text = self.Value .. (optionSettings.Suffix and " " .. (type(optionSettings.Suffix) == "function" and optionSettings.Suffix(self.Value) or optionSettings.Suffix) or "")
-			
+
 			if check or final then
 				optionSettings.Function(value, final)
 			end
@@ -1016,23 +1016,23 @@ components = {
 				and (inputObj.Position.Y - slider.AbsolutePosition.Y) > (20 * scale.Scale)
 			then
 				local newPosition = math.clamp((inputObj.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
-				
+
 				moduleapi:SetValue(math.floor((optionSettings.Min + (optionSettings.Max - optionSettings.Min) * newPosition) * optionSettings.Decimal) / optionSettings.Decimal, newPosition)
-				
+
 				local lastValue = moduleapi.Value
 				local lastPosition = newPosition
-		
+
 				local changed = inputService.InputChanged:Connect(function(input)
 					if input.UserInputType == (inputObj.UserInputType == Enum.UserInputType.MouseButton1 and Enum.UserInputType.MouseMovement or Enum.UserInputType.Touch) then
 						local newPosition = math.clamp((input.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
-					
+
 						moduleapi:SetValue(math.floor((optionSettings.Min + (optionSettings.Max - optionSettings.Min) * newPosition) * optionSettings.Decimal) / optionSettings.Decimal, newPosition)
-						
+
 						lastValue = moduleapi.Value
 						lastPosition = newPosition
 					end
 				end)
-		
+
 				local ended
 				ended = inputObj.Changed:Connect(function()
 					if inputObj.UserInputState == Enum.UserInputState.End then
@@ -1077,7 +1077,7 @@ components = {
 				moduleapi:SetValue(tonumber(valueBox.Text), nil, true)
 			end
 		end)
-		
+
 		moduleapi.Object = slider
 		libraryapi.Modules[slider.Name] = moduleapi;
 
@@ -1102,7 +1102,7 @@ components = {
 	TextBox = function(optionSettings, children, api)
 		local moduleapi = {
 			Type = "TextBox",
-			Category = api.Button.Name;
+			Category = api.Name or api.Button.Name;
 			Value = optionSettings.Default or "",
 			Index = 0
 		}
@@ -1169,7 +1169,7 @@ components = {
 
 			table.clear(self.Connections);
 		end
-		
+
 		textBox.MouseButton1Click:Connect(function()
 			box:CaptureFocus()
 		end)
@@ -1180,7 +1180,7 @@ components = {
 		box:GetPropertyChangedSignal('Text'):Connect(function()
 			moduleapi:SetValue(box.Text)
 		end)
-		
+
 		moduleapi.Object = textBox
 		libraryapi.Modules[textBox.Name] = moduleapi;
 
@@ -1688,6 +1688,194 @@ function libraryapi:CreateCategory(categorySettings)
 	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
 	windowList.Parent = children;
 
+	function categoryapi:CreateModule(moduleSettings)
+		libraryapi:Remove(moduleSettings.Name)
+
+		local moduleapi = {
+			Enabled = false;
+			Options = {};
+			Bind = {};
+			Index = GetTableSize(libraryapi.Modules);
+			ExtraText = moduleSettings.ExtraText;
+			Name = moduleSettings.Name;
+			Category = categorySettings.Name;
+		}
+
+		local hovered = false;
+		local held = false;
+		local heldTime
+
+		local moduleButton = Instance.new("TextButton");
+		moduleButton.Name = moduleSettings.Name;
+		moduleButton.Size = UDim2.fromOffset(220, 40);
+		moduleButton.BackgroundColor3 = theme.Main;
+		moduleButton.BorderSizePixel = 0;
+		moduleButton.AutoButtonColor = false;
+		moduleButton.Text = "            " .. moduleSettings.Name;
+		moduleButton.TextXAlignment = Enum.TextXAlignment.Left;
+		moduleButton.TextColor3 = color.Darken(theme.Text, 0.16);
+		moduleButton.TextSize = 14;
+		moduleButton.FontFace = theme.Font;
+		moduleButton.Parent = children;
+
+		local tooltipText = (moduleSettings.Tooltip or "") .. "(Right Click)"
+
+		if inputService.TouchEnabled then
+			tooltipText = (moduleSettings.Tooltip or "") .. "(Hold)"
+		end
+ 
+		AddTooltip(moduleButton, tooltipText)
+		
+		-- arrow image
+		local arrow = Instance.new("ImageLabel");
+		arrow.Name = "Arrow";
+		arrow.Size = UDim2.fromOffset(9, 4);
+		arrow.Position = UDim2.fromOffset(200, 18);
+		arrow.BackgroundTransparency = 1;
+		arrow.Image = getcustomasset("Baya/Assets/ExpandUp.png");
+		arrow.ImageColor3 = Color3.fromRGB(150, 150, 150);
+		arrow.Rotation = 180;
+		arrow.Parent = moduleButton;
+
+		local gradient = Instance.new("UIGradient");
+		gradient.Rotation = 90;
+		gradient.Enabled = false;
+		gradient.Parent = moduleButton;
+
+		local moduleChildren = Instance.new("Frame");
+		moduleChildren.Name = moduleSettings.Name .. "Children";
+		moduleChildren.Size = UDim2.new(1, 0, 0, 0);
+		moduleChildren.BackgroundColor3 = color.Darken(theme.Main, 0.02);
+		moduleChildren.BorderSizePixel = 0;
+		moduleChildren.Visible = false;
+		moduleChildren.Parent = children;
+
+		moduleapi.Children = moduleChildren
+
+		local windowList = Instance.new("UIListLayout");
+		windowList.SortOrder = Enum.SortOrder.LayoutOrder;
+		windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+		windowList.Parent = moduleChildren;
+
+		local divider = Instance.new("Frame");
+		divider.Name = "Divider";
+		divider.Size = UDim2.new(1, 0, 0, 1);
+		divider.Position = UDim2.new(0, 0, 1, -1);
+		divider.BackgroundColor3 = Color3.new(0.19, 0.19, 0.19);
+		divider.BackgroundTransparency = 0.52;
+		divider.BorderSizePixel = 0;
+		divider.Visible = false;
+		divider.Parent = moduleButton;
+
+		moduleSettings.Function = moduleSettings.Function or function() end;
+
+		AddMaid(moduleapi);
+
+		function moduleapi:Toggle(multiple)
+			if libraryapi.ThreadFix then
+				setthreadidentity(8);
+			end
+
+			self.Enabled = not self.Enabled;
+			divider.Visible = self.Enabled;
+			gradient.Enabled = self.Enabled;
+
+			moduleButton.TextColor3 = self.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
+			moduleButton.BackgroundColor3 = (hovered or moduleChildren.Visible) and color.Lighten(theme.Main, 0.02) or theme.Main
+			
+			if not self.Enabled then
+				for _, v in self.Connections do
+					v:Disconnect()
+				end
+				table.clear(self.Connections)
+			end
+
+			task.spawn(moduleSettings.Function, self.Enabled)
+		end
+
+		for i, v in components do
+			moduleapi['Create'..i] = function(_, optionSettings)
+				return v(optionSettings, moduleChildren, moduleapi)
+			end
+		end
+
+		moduleButton.MouseEnter:Connect(function()
+			hovered = true;
+
+			if not moduleapi.Enabled and not moduleChildren.Visible then
+				moduleButton.TextColor3 = theme.Text;
+				moduleButton.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+			end
+		end);
+		moduleButton.MouseLeave:Connect(function()
+			hovered = false
+			if not moduleapi.Enabled and not moduleChildren.Visible then
+				moduleButton.TextColor3 = color.Darken(theme.Text, 0.16);
+				moduleButton.BackgroundColor3 = theme.Main;
+			end
+		end);
+		moduleButton.MouseButton1Click:Connect(function()
+			if not heldTime then
+				moduleapi:Toggle();
+			end
+		end);
+		moduleButton.MouseButton2Click:Connect(function()
+			moduleChildren.Visible = not moduleChildren.Visible
+			arrow.Rotation = arrow.Rotation == 0 and 180 or 0
+		end);
+
+		if inputService.TouchEnabled then
+			moduleButton.MouseButton1Down:Connect(function()
+				held = true
+
+				local holdtime, holdpos = tick(), inputService:GetMouseLocation()
+				repeat
+					held = (inputService:GetMouseLocation() - holdpos).Magnitude < 3
+					heldTime = (tick() - holdtime) > 1
+					task.wait()
+				until heldTime or not held or not clickFrame.Visible
+
+				if held and clickFrame.Visible then
+					if libraryapi.ThreadFix then
+						setthreadidentity(8);
+					end
+
+					moduleChildren.Visible = not moduleChildren.Visible
+				end
+			end)
+			moduleButton.MouseButton1Up:Connect(function()
+				held = false;
+			end)
+		end
+
+		windowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			if libraryapi.ThreadFix then
+				setthreadidentity(8);
+			end
+			moduleChildren.Size = UDim2.new(1, 0, 0, windowList.AbsoluteContentSize.Y / scale.Scale);
+		end);
+
+		moduleapi.Object = moduleButton;
+		libraryapi.Modules[moduleSettings.Name] = moduleapi;
+
+		local sorting = {};
+		for _, v in libraryapi.Modules do
+			sorting[v.Category] = sorting[v.Category] or {};
+			table.insert(sorting[v.Category], v.Name);
+		end
+
+		for _, sort in sorting do
+			table.sort(sort);
+			for i, v in sort do
+				libraryapi.Modules[v].Index = i;
+				libraryapi.Modules[v].Object.LayoutOrder = i;
+				libraryapi.Modules[v].Children.LayoutOrder = i;
+			end
+		end
+
+		return moduleapi
+	end
+
 	function categoryapi:Expand()
 		self.Expanded = not self.Expanded;
 
@@ -1723,7 +1911,7 @@ function libraryapi:CreateCategory(categorySettings)
 		if self.ThreadFix then
 			setthreadidentity(8)
 		end
-		
+
 		divider.Visible = children.CanvasPosition.Y > 10 and children.Visible
 	end)
 
