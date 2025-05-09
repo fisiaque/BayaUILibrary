@@ -1009,7 +1009,7 @@ components = {
 		end
 
 		slider.InputBegan:Connect(function(inputObj)
-			if not libraryapi.Windows.Dragging then return end -- makes sure it doesn't change when dragging gui
+			if libraryapi.Windows.Dragging ~= nil then return end -- makes sure it doesn't change when dragging gui
 
 			if
 				(inputObj.UserInputType == Enum.UserInputType.MouseButton1 or inputObj.UserInputType == Enum.UserInputType.Touch)
