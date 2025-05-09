@@ -32,10 +32,10 @@ Create Divider
 main:CreateDivider({
 	Text = "Hello World";
 	Alignment = Enum.TextXAlignment.Center;
-})
+});
 
 --|| Creates a Divider for said category i.e main category
-main:CreateDivider()
+main:CreateDivider();
 ```
 
 Create Category:
@@ -50,18 +50,18 @@ local test = shared.baya:CreateCategory({
 Create Button:
 ```lua
 test:CreateButton({
-  Name = 'Hello World',
+	Name = 'Hello World',
 	Function = function(callback)
 		shared.baya:CreateNotification("Button", "Hello World pressed", 2, "Warning")
 	end,
 	Tooltip = "Notify the WORLD!"
-})
+});
 ```
 
 Create Toggle:
 ```lua
 test:CreateToggle({
-  Name = 'Hello World 2',
+	Name = 'Hello World 2',
 	Function = function(callback)
 		if callback then
 			shared.baya:CreateNotification("Toggle", "World ON", 2, "Alert")
@@ -70,7 +70,7 @@ test:CreateToggle({
 		end
 	end,
 	Tooltip = "World is cool huh!"
-})
+});
 ```
 
 Create Slider:
@@ -84,7 +84,7 @@ test:CreateSlider({
 		shared.baya:CreateNotification("Slider", tostring(value), 2, "Alert")
 	end,
 	Tooltip = "Are you COOL!"
-})
+});
 ```
 
 Create TextBox:
@@ -98,12 +98,12 @@ test0:CreateTextBox({
 		shared.baya:CreateNotification("TextBox: " .. tostring(enterPressed), text, 2, "Alert")
 	end,
 	Tooltip = "What text are you going to write!"
-})
+});
 ```
 
 Finish Load:
 ```lua
-library:Load()
+library:Load();
 ```
 
 **Customizables**:
@@ -111,13 +111,13 @@ library:Load()
 Notifications:
 *Alert|Warning*
 ```lua
-shared.baya:CreateNotification("?", "?", 5, "Alert")
+shared.baya:CreateNotification("?", "?", 5, "Alert");
 ```
 
 Category Icons:
 *ActionIcon.png|PrayerIcon.png*
 ```lua
-Icon = "Baya/Assets/ActionIcon.png"
+Icon = "Baya/Assets/ActionIcon.png";
 ```
 
 **Tips**:
@@ -129,5 +129,5 @@ repeat task.wait() until game:IsLoaded()
 if shared.baya then shared.baya:Uninject() end
 if shared.Init then return end
 
-shared.Init = true
+shared.Init = true;
 ```
