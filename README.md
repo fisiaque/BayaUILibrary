@@ -26,7 +26,7 @@ Create GUI:
 local main = library:CreateGui();
 ```
 
-Create Divider
+Create Divider:
 ```lua
 --|| Creates a Divider w/ Text
 main:CreateDivider({
@@ -38,15 +38,14 @@ main:CreateDivider({
 main:CreateDivider();
 ```
 
-Create Informations Tab
+Create Info Pane:
 ```lua
 local info = main:CreateInfoPane()
 
 info:CreateDivider({ -- add text
-		Text = "Hello World";
-		Alignment = Enum.TextXAlignment.Left;
-	})
-end	
+	Text = "Hello World";
+	Alignment = Enum.TextXAlignment.Left;
+});
 ```
 
 Create Category:
