@@ -38,6 +38,17 @@ main:CreateDivider({
 main:CreateDivider();
 ```
 
+Create Informations Tab
+```lua
+local info = main:CreateInfoPane()
+
+info:CreateDivider({ -- add text
+		Text = "Hello World";
+		Alignment = Enum.TextXAlignment.Left;
+	})
+end	
+```
+
 Create Category:
 ```lua
 local test = shared.baya:CreateCategory({
