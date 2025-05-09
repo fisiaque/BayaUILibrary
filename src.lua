@@ -40,6 +40,8 @@ local tween = {
 	tweenstwo = {};
 }
 local assets = { 
+	["Baya/Assets/Back.png"] = "rbxassetid://75316536217652";
+	["Baya/Assets/Close.png"] = "rbxassetid://102880067633676";
 	["Baya/Assets/Warning.png"] = "rbxassetid://125144969372589";
 	["Baya/Assets/Alert.png"] = "rbxassetid://102812705220441";
 	["Baya/Assets/Info.png"] = "rbxassetid://105237774908134";
@@ -50,6 +52,7 @@ local assets = {
 	["Baya/Assets/ActionIcon.png"] = "rbxassetid://129077738159596";
 	["Baya/Assets/PrayerIcon.png"] = "rbxassetid://112615257443345";
 	["Baya/Assets/BayaLogo.png"] = "rbxassetid://71142378499430"; 
+	["Baya/Assets/Information.png"] = "rbxassetid://71332231979757"; 
 }
 -- getcustomasset built in-function in exploit executors
 local assetfunction = getcustomasset 
@@ -62,9 +65,6 @@ local pp = UDim2.fromOffset(236, 60)
 -- fontsize
 local fontsize = Instance.new('GetTextBoundsParams')
 fontsize.Width = math.huge
-
--- tooltip
-local showTooltip = true
 
 --
 local components
@@ -252,6 +252,10 @@ end
 local function AddTooltip(gui, text)
 	if not text then return end
 
+	local optionapi = {
+		Visible = true;
+	}
+
 	local function TooltipMoved(x, y)
 		local right = x + 16 + tooltip.Size.X.Offset > (scale.Scale * 1920)
 
@@ -260,7 +264,7 @@ local function AddTooltip(gui, text)
 			((y + 11) - (tooltip.Size.Y.Offset / 2)) / scale.Scale
 		)
 
-		tooltip.Visible = showTooltip
+		tooltip.Visible = optionapi.Visible
 	end
 
 	gui.MouseEnter:Connect(function(x, y)
@@ -276,6 +280,40 @@ local function AddTooltip(gui, text)
 	gui.MouseLeave:Connect(function()
 		tooltip.Visible = false
 	end)
+
+	return optionapi
+end
+
+-- Create Close Button
+local function CreateCloseButton(parent, offset)
+	local close = Instance.new("ImageButton");
+	close.Name = "Close";
+	close.Size = UDim2.fromOffset(24, 24);
+	close.Position = UDim2.new(1, -35, 0, offset or 9);
+	close.BackgroundColor3 = Color3.new(1, 1, 1);
+	close.BackgroundTransparency = 1;
+	close.AutoButtonColor = false;
+	close.Image = getcustomasset("Baya/Assets/Close.png");
+	close.ImageColor3 = color.Lighten(theme.Text, 0.2);
+	close.ImageTransparency = 0.5;
+	close.Parent = parent;
+
+	close.MouseEnter:Connect(function()
+		close.ImageTransparency = 0.3;
+
+		tween:Tween(close, theme.Tween, {
+			BackgroundTransparency = 0.6
+		});
+	end);
+	close.MouseLeave:Connect(function()
+		close.ImageTransparency = 0.5;
+
+		tween:Tween(close, theme.Tween, {
+			BackgroundTransparency = 1
+		});
+	end);
+
+	return close
 end
 
 -- make gui draggable
@@ -1406,6 +1444,100 @@ function libraryapi:CreateGUI()
 		components.Divider(textSettings, children)
 	end
 
+	function categoryapi:CreateInfoPane(categorySettings)
+		local optionapi = {};
+		
+		local infoButton = Instance.new("TextButton");
+		infoButton.Name = "Info";
+		infoButton.Size = UDim2.fromOffset(40, 40);
+		infoButton.Position = UDim2.new(1, -40, 0, 0);
+		infoButton.BackgroundTransparency = 1;
+		infoButton.Text = "";
+		infoButton.Parent = window;
+
+		local infoTooltip = AddTooltip(infoButton, "Open Information");
+
+		local infoIcon = Instance.new("ImageLabel");
+		infoIcon.Size = UDim2.fromOffset(14, 14);
+		infoIcon.Position = UDim2.fromOffset(15, 12);
+		infoIcon.BackgroundTransparency = 1;
+		infoIcon.Image = getcustomasset("Baya/Assets/Information.png");
+		infoIcon.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		infoIcon.Parent = infoButton;
+
+		local infoPane = Instance.new("TextButton");
+		infoPane.Name = "MainInfoPane";
+		infoPane.Size = UDim2.fromScale(1, 1);
+		infoPane.BackgroundColor3 = color.Darken(theme.Main, 0.02);
+		infoPane.AutoButtonColor = false;
+		infoPane.Visible = false;
+		infoPane.Text = "";
+		infoPane.Parent = window;
+
+		local infoTitle = Instance.new("TextLabel");
+		infoTitle.Name = "Title";
+		infoTitle.Size = UDim2.new(1, -36, 0, 20);
+		infoTitle.Position = UDim2.fromOffset(math.abs(infoTitle.Size.X.Offset), 11);
+		infoTitle.BackgroundTransparency = 1;
+		infoTitle.Text = "Information";
+		infoTitle.TextXAlignment = Enum.TextXAlignment.Left;
+		infoTitle.TextColor3 = theme.Text;
+		infoTitle.TextSize = 13;
+		infoTitle.FontFace = theme.Font;
+		infoTitle.Parent = infoPane;
+
+		local infoBack = Instance.new("ImageButton");
+		infoBack.Name = "Back";
+		infoBack.Size = UDim2.fromOffset(16, 16);
+		infoBack.Position = UDim2.fromOffset(11, 13);
+		infoBack.BackgroundTransparency = 1;
+		infoBack.Image = getcustomasset("Baya/Assets/Back.png");
+		infoBack.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		infoBack.Parent = infoPane;
+
+		local infoChildren = Instance.new("ScrollingFrame");
+		infoChildren.Name = "Children";
+		infoChildren.Size = UDim2.new(1, 0, 1, -57);
+		infoChildren.Position = UDim2.fromOffset(0, 41);
+		infoChildren.BackgroundColor3 = theme.Main;
+		infoChildren.BorderSizePixel = 0;
+		infoChildren.Parent = infoPane;
+
+		local infoWindowList = Instance.new("UIListLayout");
+		infoWindowList.SortOrder = Enum.SortOrder.LayoutOrder;
+		infoWindowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+		infoWindowList.Parent = infoChildren;
+		
+		for i, v in components do
+			optionapi["Create" .. i] = function(_, settings)
+				return v(settings, infoChildren, categoryapi)
+			end
+		end
+		
+		infoBack.MouseEnter:Connect(function()
+			infoBack.ImageColor3 = theme.Text;
+		end);
+		infoBack.MouseLeave:Connect(function()
+			infoBack.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		end);
+		infoBack.MouseButton1Click:Connect(function()
+			infoPane.Visible = false;
+			infoTooltip.Visible = true;
+		end);
+		infoButton.MouseEnter:Connect(function()
+			infoIcon.ImageColor3 = theme.Text;
+		end);
+		infoButton.MouseLeave:Connect(function()
+			infoIcon.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		end);
+		infoButton.MouseButton1Click:Connect(function()
+			infoTooltip.Visible = false;
+			infoPane.Visible = true;
+		end);
+
+		return optionapi
+	end
+
 	windowList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		if self.ThreadFix then
 			setthreadidentity(8)
@@ -1422,6 +1554,7 @@ function libraryapi:CreateGUI()
 
 	return categoryapi
 end
+
 
 function libraryapi:CreateCategory(categorySettings)
 	local categoryapi = {
