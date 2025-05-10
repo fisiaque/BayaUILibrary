@@ -2197,6 +2197,9 @@ function libraryapi:CreateSetting(categorySettings)
 	local window;
 	local categoryapi;
 	
+ -- get asset
+ categorySettings.Icon = getcustomasset(categorySettings.Icon)
+
 	categoryapi = {
 		Type = "Setting";
 		Expanded = false;
