@@ -41,8 +41,14 @@ local tween = {
 	tweenstwo = {};
 }
 local assets = { 
-	["Baya/Assets/SettingsTab.png"] = "rbxassetid://86368377735020";
-	["Baya/Assets/SettingsIcon.png"] = "rbxassetid://135478816572832";
+	["Baya/Assets/TargetNPC2.png"] = "rbxassetid://77239207133446";
+	["Baya/Assets/TargetNPC1.png"] = "rbxassetid://75592962447173";
+	["Baya/Assets/TargetPlayers2.png"] = "rbxassetid://123072416930061";
+	["Baya/Assets/TargetPlayers1.png"] = "rbxassetid://128003379264185";
+	["Baya/Assets/TargetsTab.png"] = "rbxassetid://140358380459563";
+	["Baya/Assets/TargetInfoIcon.png"] = "rbxassetid://77997550419795";
+	["Baya/Assets/OverlaysTab.png"] = "rbxassetid://116361074159990";
+	["Baya/Assets/OverlaysIcon.png"] = "rbxassetid://122285297597247";
 	["Baya/Assets/Cog.png"] = "rbxassetid://70765920396000";
 	["Baya/Assets/Pin.png"] = "rbxassetid://113308222846418";
 	["Baya/Assets/Back.png"] = "rbxassetid://75316536217652";
@@ -75,6 +81,7 @@ fontsize.Width = math.huge
 local components
 local tooltip
 local scale
+local clickFrame
 
 -- creates a safe reference to a roblox instance object if executor doesn"t already have on pre-built
 local cloneref = cloneref or function(obj)
@@ -183,7 +190,7 @@ end
 -- rearrange
 local function RearrangeButton(optionapi, _bool)
 	optionapi.Enabled = _bool
-	
+
 	if optionapi.Object:FindFirstChild("Arrow") then
 		tween:Tween(optionapi.Object.Arrow, theme.Tween, {
 			Position = UDim2.new(1, optionapi.Enabled and -14 or -20, 0, 16)
@@ -342,7 +349,7 @@ local function Dragify(gui, window)
 				gui.AbsolutePosition.X - inputObj.Position.X,
 				gui.AbsolutePosition.Y - inputObj.Position.Y + guiService:GetGuiInset().Y
 			) 
-			
+
 			if gui:IsDescendantOf(libraryapi.gui.ScaledFrame) then
 				dragPosition /= libraryapi.gui.ScaledFrame.UIScale.Scale
 			end
@@ -363,17 +370,17 @@ local function Dragify(gui, window)
 						dragPosition = (dragPosition // 3) * 3;
 						position = (position // 3) * 3;
 					end
-					
+
 					local posX = position.X
 					local posY = position.Y
-					
+
 					local maxX = (gui.Parent.AbsoluteSize.X - gui.AbsoluteSize.X) 
 					local maxY = (gui.Parent.AbsoluteSize.Y - gui.AbsoluteSize.Y) 
-			
+
 					if gui:IsDescendantOf(libraryapi.gui.ScaledFrame) then
 						posX /= libraryapi.gui.ScaledFrame.UIScale.Scale
 						posY /= libraryapi.gui.ScaledFrame.UIScale.Scale
-						
+
 						maxX /= libraryapi.gui.ScaledFrame.UIScale.Scale
 						maxY /= libraryapi.gui.ScaledFrame.UIScale.Scale
 					end
@@ -473,11 +480,11 @@ do
 end
 
 libraryapi.Libraries = {
-	color = color,
-	getcustomasset = getcustomasset,
-	getfontsize = getfontsize,
-	tween = tween,
-	theme = theme,
+	color = color;
+	getcustomasset = getcustomasset;
+	getfontsize = getfontsize;
+	tween = tween;
+	theme = theme;
 }
 
 components = {
@@ -1229,6 +1236,326 @@ components = {
 			divider.Parent = label;
 		end
 	end;
+	Targets = function(optionSettings, children, api)
+		local optionapi = {
+			Type = "Targets",
+			Index = GetTableSize(api.Options)
+		}
+		
+		local textList = Instance.new("TextButton");
+		textList.Name = "Targets";
+		textList.Size = UDim2.new(1, 0, 0, 50);
+		textList.BackgroundColor3 = color.Darken(children.BackgroundColor3, optionSettings.Darker and 0.02 or 0);
+		textList.BorderSizePixel = 0;
+		textList.AutoButtonColor = false;
+		textList.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		textList.Text = "";
+		textList.Parent = children;
+
+		AddTooltip(textList, optionSettings.Tooltip);
+
+		local bkg = Instance.new("Frame");
+		bkg.Name = "BKG";
+		bkg.Size = UDim2.new(1, -20, 1, -9);
+		bkg.Position = UDim2.fromOffset(10, 4);
+		bkg.BackgroundColor3 = color.Lighten(theme.Main, 0.034);
+		bkg.Parent = textList;
+
+		local button = Instance.new("TextButton");
+		button.Name = "TextList";
+		button.Size = UDim2.new(1, -2, 1, -2);
+		button.Position = UDim2.fromOffset(1, 1);
+		button.BackgroundColor3 = theme.Main;
+		button.AutoButtonColor = false;
+		button.Text = "";
+		button.Parent = bkg;
+
+		local buttonTitle = Instance.new("TextLabel");
+		buttonTitle.Name = "Title";
+		buttonTitle.Size = UDim2.new(1, -5, 0, 15);
+		buttonTitle.Position = UDim2.fromOffset(5, 6);
+		buttonTitle.BackgroundTransparency = 1;
+		buttonTitle.Text = "Target:";
+		buttonTitle.TextXAlignment = Enum.TextXAlignment.Left;
+		buttonTitle.TextColor3 = color.Darken(theme.Text, 0.16);
+		buttonTitle.TextSize = 15;
+		buttonTitle.TextTruncate = Enum.TextTruncate.AtEnd;
+		buttonTitle.FontFace = theme.Font;
+		buttonTitle.Parent = button;
+
+		local items = buttonTitle:Clone();
+		items.Name = "Items";
+		items.Position = UDim2.fromOffset(5, 21);
+		items.Text = "Ignore none";
+		items.TextColor3 = color.Darken(theme.Text, 0.16);
+		items.TextSize = 11;
+		items.Parent = button;
+
+		local tool = Instance.new("Frame");
+		tool.Size = UDim2.fromOffset(65, 12);
+		tool.Position = UDim2.fromOffset(52, 8);
+		tool.BackgroundTransparency = 1;
+		tool.Parent = button;
+
+		local toolList = Instance.new("UIListLayout");
+		toolList.FillDirection = Enum.FillDirection.Horizontal;
+		toolList.Padding = UDim.new(0, 6);
+		toolList.Parent = tool;
+
+		local window = Instance.new("TextButton");
+		window.Name = "TargetsTextWindow";
+		window.Size = UDim2.fromOffset(220, 145);
+		window.BackgroundColor3 = theme.Main;
+		window.BorderSizePixel = 0;
+		window.AutoButtonColor = false;
+		window.Visible = false;
+		window.Text = "";
+		window.Parent = clickFrame;
+
+		optionapi.Window = window;
+
+		local icon = Instance.new("ImageLabel");
+		icon.Name = "Icon";
+		icon.Size = UDim2.fromOffset(18, 12);
+		icon.Position = UDim2.fromOffset(10, 15);
+		icon.BackgroundTransparency = 1;
+		icon.Image = getcustomasset("Baya/Assets/TargetsTab.png");
+		icon.Parent = window;
+
+		local title = Instance.new("TextLabel");
+		title.Name = "Title";
+		title.Size = UDim2.new(1, -36, 0, 20);
+		title.Position = UDim2.fromOffset(math.abs(title.Size.X.Offset), 11);
+		title.BackgroundTransparency = 1;
+		title.Text = "Target Settings";
+		title.TextXAlignment = Enum.TextXAlignment.Left;
+		title.TextColor3 = theme.Text;
+		title.TextSize = 13;
+		title.FontFace = theme.Font;
+		title.Parent = window;
+
+		local close = CreateCloseButton(window);
+
+		optionSettings.Function = optionSettings.Function or function() end;
+		
+		function optionapi:Save(tab)
+			tab.Targets = {
+				Players = self.Players.Enabled,
+				NPCs = self.NPCs.Enabled,
+				Invisible = self.Invisible.Enabled,
+				Walls = self.Walls.Enabled
+			}
+		end
+		
+		function optionapi:Load(tab)
+			if self.Players.Enabled ~= tab.Players then
+				self.Players:Toggle()
+			end
+			if self.NPCs.Enabled ~= tab.NPCs then
+				self.NPCs:Toggle()
+			end
+			if self.Invisible.Enabled ~= tab.Invisible then
+				self.Invisible:Toggle()
+			end
+			if self.Walls.Enabled ~= tab.Walls then
+				self.Walls:Toggle()
+			end
+		end
+		
+		optionapi.Players = components.TargetsButton({
+			Position = UDim2.fromOffset(11, 45),
+			Icon = getcustomasset("Baya/Assets/TargetPlayers1.png"),
+			IconSize = UDim2.fromOffset(15, 16),
+			IconParent = tool,
+			ToolIcon = getcustomasset("Baya/Assets/TargetPlayers2.png"),
+			ToolSize = UDim2.fromOffset(11, 12),
+			Tooltip = 'Players',
+			Function = optionSettings.Function
+		}, window, tool)
+
+		optionapi.NPCs = components.TargetsButton({
+			Position = UDim2.fromOffset(112, 45),
+			Icon = getcustomasset("Baya/Assets/TargetNPC1.png"),
+			IconSize = UDim2.fromOffset(12, 16),
+			IconParent = tool,
+			ToolIcon = getcustomasset("Baya/Assets/TargetNPC2.png"),
+			ToolSize = UDim2.fromOffset(9, 12),
+			Tooltip = 'NPCs',
+			Function = optionSettings.Function
+		}, window, tool)
+
+		optionapi.Invisible = components.Toggle({
+			Name = 'Ignore Invisible',
+			Function = function()
+				local text = 'none'
+				if optionapi.Invisible.Enabled then
+					text = 'invisible'
+				end
+				if optionapi.Walls.Enabled then
+					text = text == 'none' and 'behind walls' or text..', behind walls'
+				end
+				items.Text = 'Ignore '..text
+				optionSettings.Function()
+			end
+		}, window, {Options = {}})
+
+		optionapi.Invisible.Object.Position = UDim2.fromOffset(0, 81);
+
+		optionapi.Walls = components.Toggle({
+			Name = 'Ignore behind walls',
+			Function = function()
+				local text = 'none'
+				if optionapi.Invisible.Enabled then
+					text = 'invisible'
+				end
+				if optionapi.Walls.Enabled then
+					text = text == 'none' and 'behind walls' or text..', behind walls'
+				end
+				items.Text = 'Ignore '..text
+				optionSettings.Function()
+			end
+		}, window, {Options = {}})
+
+		optionapi.Walls.Object.Position = UDim2.fromOffset(0, 111)
+
+		if optionSettings.Players then
+			optionapi.Players:Toggle()
+		end
+		if optionSettings.NPCs then
+			optionapi.NPCs:Toggle()
+		end
+		if optionSettings.Invisible then
+			optionapi.Invisible:Toggle()
+		end
+		if optionSettings.Walls then
+			optionapi.Walls:Toggle()
+		end
+		
+		close.MouseButton1Click:Connect(function()
+			window.Visible = false;
+		end)
+
+		button.MouseButton1Click:Connect(function()
+			window.Visible = not window.Visible;
+			tween:Cancel(bkg);
+			bkg.BackgroundColor3 = window.Visible and Color3.fromHSV(libraryapi.Interface.Hue, libraryapi.Interface.Sat, libraryapi.Interface.Value) or color.Lighten(theme.Main, 0.37);
+		end)
+
+		textList.MouseEnter:Connect(function()
+			if not optionapi.Window.Visible then
+				tween:Tween(bkg, theme.Tween, {
+					BackgroundColor3 = color.Lighten(theme.Main, 0.37)
+				})
+			end
+		end)
+		textList.MouseLeave:Connect(function()
+			if not optionapi.Window.Visible then
+				tween:Tween(bkg, theme.Tween, {
+					BackgroundColor3 = color.Lighten(theme.Main, 0.034)
+				})
+			end
+		end)
+		textList:GetPropertyChangedSignal('AbsolutePosition'):Connect(function()
+			if libraryapi.ThreadFix then
+				setthreadidentity(8)
+			end
+
+			local actualPosition = (textList.AbsolutePosition + Vector2.new(0, 60)) / scale.Scale
+			window.Position = UDim2.fromOffset(actualPosition.X + 220, actualPosition.Y)
+		end)
+		
+		optionapi.Object = textList
+		api.Options.Targets = optionapi
+		
+		return optionapi
+	end,
+	TargetsButton = function(optionSettings, children, api)
+		local optionapi = {Enabled = false};
+		
+		local targetbutton = Instance.new("TextButton");
+		targetbutton.Size = UDim2.fromOffset(98, 31);
+		targetbutton.Position = optionSettings.Position;
+		targetbutton.BackgroundColor3 = color.Lighten(theme.Main, 0.05);
+		targetbutton.AutoButtonColor = false;
+		targetbutton.Visible = optionSettings.Visible == nil or optionSettings.Visible;
+		targetbutton.Text = "";
+		targetbutton.Parent = children;
+
+		AddTooltip(targetbutton, optionSettings.Tooltip);
+
+		local bkg = Instance.new('Frame')
+		bkg.Size = UDim2.new(1, -2, 1, -2)
+		bkg.Position = UDim2.fromOffset(1, 1)
+		bkg.BackgroundColor3 = theme.Main
+		bkg.Parent = targetbutton
+
+		local icon = Instance.new("ImageLabel");
+		icon.Size = optionSettings.IconSize;
+		icon.Position = UDim2.fromScale(0.5, 0.5);
+		icon.AnchorPoint = Vector2.new(0.5, 0.5);
+		icon.BackgroundTransparency = 1;
+		icon.Image = optionSettings.Icon;
+		icon.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		icon.Parent = bkg;
+		
+		optionSettings.Function = optionSettings.Function or function() end;
+
+		local tooltipicon;
+		
+		function optionapi:Toggle()
+			self.Enabled = not self.Enabled
+
+			tween:Tween(bkg, theme.Tween, {
+				BackgroundColor3 = self.Enabled and Color3.fromHSV(libraryapi.Interface.Hue, libraryapi.Interface.Sat, libraryapi.Interface.Value) or theme.Main
+			})
+			tween:Tween(icon, theme.Tween, {
+				ImageColor3 = self.Enabled and Color3.new(1, 1, 1) or color.Lighten(theme.Main, 0.37)
+			})
+
+			if tooltipicon then
+				tooltipicon:Destroy()
+			end
+
+			if self.Enabled then
+				tooltipicon = Instance.new("ImageLabel");
+				tooltipicon.Size = optionSettings.ToolSize;
+				tooltipicon.BackgroundTransparency = 1;
+				tooltipicon.Image = optionSettings.ToolIcon;
+				tooltipicon.ImageColor3 = theme.Text;
+				tooltipicon.Parent = optionSettings.IconParent;
+			end
+
+			optionSettings.Function(self.Enabled)
+		end
+		
+		targetbutton.MouseEnter:Connect(function()
+			if not optionapi.Enabled then
+				tween:Tween(bkg, theme.Tween, {
+					BackgroundColor3 = Color3.fromHSV(libraryapi.Interface.Hue, libraryapi.Interface.Sat, libraryapi.Interface.Value - 0.25)
+				});
+				tween:Tween(icon, theme.Tween, {
+					ImageColor3 = Color3.new(1, 1, 1)
+				});
+			end
+		end)
+		targetbutton.MouseLeave:Connect(function()
+			if not optionapi.Enabled then
+				tween:Tween(bkg, theme.Tween, {
+					BackgroundColor3 = theme.Main
+				});
+				tween:Tween(icon, theme.Tween, {
+					ImageColor3 = color.Lighten(theme.Main, 0.37)
+				});
+			end
+		end);
+		targetbutton.MouseButton1Click:Connect(function()
+			optionapi:Toggle();
+		end);
+		
+		optionapi.Object = targetbutton;
+		
+		return optionapi
+	end,
 }
 
 libraryapi.Components = setmetatable(components, {
@@ -1255,7 +1582,7 @@ end
 
 -- update baya libraryapi
 local _, subbed = pcall(function()
-    return game:HttpGet("https://github.com/fisiaque/BayaUILibrary")
+	return game:HttpGet("https://github.com/fisiaque/BayaUILibrary")
 end)
 
 local commit = subbed:find("currentOid")
@@ -1263,7 +1590,7 @@ commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 commit = commit and #commit == 40 and commit or "main"
 
 if commit == "main" or (isfile("Baya/Commits/Library.txt") and readfile("Baya/Commits/Library.txt") or "") ~= commit then
-    WipeFolder("Baya/Assets")
+	WipeFolder("Baya/Assets")
 	WipeFolder("Baya/Commits")
 	WipeFolder("Baya/Games")
 	WipeFolder("Baya/Libraries")
@@ -1282,10 +1609,10 @@ gui.OnTopOfCoreBlur = true
 
 -- if threadidentity exist parent to core gui otherwise player gui
 if libraryapi.ThreadFix then
-    gui.Parent = cloneref(game:GetService("CoreGui"));
+	gui.Parent = cloneref(game:GetService("CoreGui"));
 else
-    gui.Parent = cloneref(game:GetService("Players")).LocalPlayer.PlayerGui;
-    gui.ResetOnSpawn = false;
+	gui.Parent = cloneref(game:GetService("Players")).LocalPlayer.PlayerGui;
+	gui.ResetOnSpawn = false;
 end
 
 -- set a main variable for gui
@@ -1312,7 +1639,7 @@ notifications.Name = "Notifications"
 notifications.Parent = scaledFrame
 
 -- create click gui
-local clickFrame = Instance.new("Frame");
+clickFrame = Instance.new("Frame");
 clickFrame.Name = "ClickFrame";
 clickFrame.Size = UDim2.fromScale(1, 1); 
 clickFrame.BackgroundTransparency = 1;
@@ -1467,11 +1794,11 @@ function libraryapi:CreateGUI()
 		components.Divider(textSettings, children)
 	end
 
-	function categoryapi:CreateSettingBar()
+	function categoryapi:CreateOverlayBar()
 		local optionapi = {Toggles = {}};
 
 		local bar = Instance.new("Frame");
-		bar.Name = "Settings";
+		bar.Name = "Overlays";
 		bar.Size = UDim2.fromOffset(220, 36);
 		bar.BackgroundColor3 = theme.Main;
 		bar.BorderSizePixel = 0;
@@ -1484,11 +1811,11 @@ function libraryapi:CreateGUI()
 		button.Position = UDim2.new(1, -29, 0, 7);
 		button.BackgroundTransparency = 1;
 		button.AutoButtonColor = false;
-		button.Image = getcustomasset("Baya/Assets/SettingsIcon.png");
+		button.Image = getcustomasset("Baya/Assets/OverlaysIcon.png");
 		button.ImageColor3 = color.Lighten(theme.Main, 0.37);
 		button.Parent = bar;
 
-		AddTooltip(button, 'Open Settings Menu');
+		AddTooltip(button, 'Open Overlays Menu');
 
 		local shadow = Instance.new("TextButton");
 		shadow.Name = "Shadow";
@@ -1512,7 +1839,7 @@ function libraryapi:CreateGUI()
 		icon.Size = UDim2.fromOffset(14, 12);
 		icon.Position = UDim2.fromOffset(10, 13);
 		icon.BackgroundTransparency = 1;
-		icon.Image = getcustomasset("Baya/Assets/SettingsTab.png")
+		icon.Image = getcustomasset("Baya/Assets/OverlaysTab.png")
 		icon.ImageColor3 = theme.Text;
 		icon.Parent = window;
 
@@ -1521,7 +1848,7 @@ function libraryapi:CreateGUI()
 		title.Size = UDim2.new(1, -36, 0, 38);
 		title.Position = UDim2.fromOffset(36, 0);
 		title.BackgroundTransparency = 1;
-		title.Text = "Settings";
+		title.Text = "Overlays";
 		title.TextXAlignment = Enum.TextXAlignment.Left;
 		title.TextColor3 = theme.Text;
 		title.TextSize = 15;
@@ -1702,115 +2029,115 @@ function libraryapi:CreateGUI()
 			childrenToggle.Size = UDim2.fromOffset(220, window.Size.Y.Offset - 5);
 		end)
 
-		libraryapi.Settings = optionapi
+		libraryapi.Overlays = optionapi
 
 		return optionapi
 	end
 
-	function categoryapi:CreateInfoPane(categorySettings)
+	function categoryapi:CreateSettPane(categorySettings)
 		local optionapi = {};
 
-		local infoButton = Instance.new("TextButton");
-		infoButton.Name = "Info";
-		infoButton.Size = UDim2.fromOffset(40, 40);
-		infoButton.Position = UDim2.new(1, -40, 0, 0);
-		infoButton.BackgroundTransparency = 1;
-		infoButton.Text = "";
-		infoButton.Parent = window;
+		local settButton = Instance.new("TextButton");
+		settButton.Name = "Sett";
+		settButton.Size = UDim2.fromOffset(40, 40);
+		settButton.Position = UDim2.new(1, -40, 0, 0);
+		settButton.BackgroundTransparency = 1;
+		settButton.Text = "";
+		settButton.Parent = window;
 
-		local infoTooltip = AddTooltip(infoButton, "Open Information");
+		local settTooltip = AddTooltip(settButton, "Open Sett");
 
-		local infoIcon = Instance.new("ImageLabel");
-		infoIcon.Size = UDim2.fromOffset(14, 14);
-		infoIcon.Position = UDim2.fromOffset(15, 12);
-		infoIcon.BackgroundTransparency = 1;
-		infoIcon.Image = getcustomasset("Baya/Assets/Information.png");
-		infoIcon.ImageColor3 = color.Lighten(theme.Main, 0.37);
-		infoIcon.Parent = infoButton;
+		local settIcon = Instance.new("ImageLabel");
+		settIcon.Size = UDim2.fromOffset(14, 14);
+		settIcon.Position = UDim2.fromOffset(15, 12);
+		settIcon.BackgroundTransparency = 1;
+		settIcon.Image = getcustomasset("Baya/Assets/Information.png");
+		settIcon.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		settIcon.Parent = settButton;
 
-		local infoPane = Instance.new("TextButton");
-		infoPane.Name = "MainInfoPane";
-		infoPane.Size = UDim2.fromScale(1, 1);
-		infoPane.BackgroundColor3 = color.Darken(theme.Main, 0.02);
-		infoPane.AutoButtonColor = false;
-		infoPane.Visible = false;
-		infoPane.Text = "";
-		infoPane.Parent = window;
+		local settPane = Instance.new("TextButton");
+		settPane.Name = "MainsettPane";
+		settPane.Size = UDim2.fromScale(1, 1);
+		settPane.BackgroundColor3 = color.Darken(theme.Main, 0.02);
+		settPane.AutoButtonColor = false;
+		settPane.Visible = false;
+		settPane.Text = "";
+		settPane.Parent = window;
 
-		local infoTitle = Instance.new("TextLabel");
-		infoTitle.Name = "Title";
-		infoTitle.Size = UDim2.new(1, -36, 0, 20);
-		infoTitle.Position = UDim2.fromOffset(math.abs(infoTitle.Size.X.Offset), 11);
-		infoTitle.BackgroundTransparency = 1;
-		infoTitle.Text = "Information";
-		infoTitle.TextXAlignment = Enum.TextXAlignment.Left;
-		infoTitle.TextColor3 = theme.Text;
-		infoTitle.TextSize = 13;
-		infoTitle.FontFace = theme.Font;
-		infoTitle.Parent = infoPane;
+		local settTitle = Instance.new("TextLabel");
+		settTitle.Name = "Title";
+		settTitle.Size = UDim2.new(1, -36, 0, 20);
+		settTitle.Position = UDim2.fromOffset(math.abs(settTitle.Size.X.Offset), 11);
+		settTitle.BackgroundTransparency = 1;
+		settTitle.Text = "Information";
+		settTitle.TextXAlignment = Enum.TextXAlignment.Left;
+		settTitle.TextColor3 = theme.Text;
+		settTitle.TextSize = 13;
+		settTitle.FontFace = theme.Font;
+		settTitle.Parent = settPane;
 
-		local infoBack = Instance.new("ImageButton");
-		infoBack.Name = "Back";
-		infoBack.Size = UDim2.fromOffset(16, 16);
-		infoBack.Position = UDim2.fromOffset(11, 13);
-		infoBack.BackgroundTransparency = 1;
-		infoBack.Image = getcustomasset("Baya/Assets/Back.png");
-		infoBack.ImageColor3 = color.Lighten(theme.Main, 0.37);
-		infoBack.Parent = infoPane;
+		local settBack = Instance.new("ImageButton");
+		settBack.Name = "Back";
+		settBack.Size = UDim2.fromOffset(16, 16);
+		settBack.Position = UDim2.fromOffset(11, 13);
+		settBack.BackgroundTransparency = 1;
+		settBack.Image = getcustomasset("Baya/Assets/Back.png");
+		settBack.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		settBack.Parent = settPane;
 
-		local infoChildren = Instance.new("ScrollingFrame");
-		infoChildren.Name = "Children";
-		infoChildren.Size = UDim2.new(1, 0, 1, -57);
-		infoChildren.Position = UDim2.fromOffset(0, 41);
-		infoChildren.BackgroundColor3 = color.Darken(theme.Main, 0.02)
-		infoChildren.BorderSizePixel = 0;
-		infoChildren.ScrollBarThickness = 2;
-		infoChildren.ScrollBarImageTransparency = 0.75;
-		infoChildren.AutomaticCanvasSize = Enum.AutomaticSize.Y;
-		infoChildren.CanvasSize = UDim2.new(0, 0, 1, 0);
-		infoChildren.Parent = infoPane;
+		local settChildren = Instance.new("ScrollingFrame");
+		settChildren.Name = "Children";
+		settChildren.Size = UDim2.new(1, 0, 1, -57);
+		settChildren.Position = UDim2.fromOffset(0, 41);
+		settChildren.BackgroundColor3 = color.Darken(theme.Main, 0.02)
+		settChildren.BorderSizePixel = 0;
+		settChildren.ScrollBarThickness = 2;
+		settChildren.ScrollBarImageTransparency = 0.75;
+		settChildren.AutomaticCanvasSize = Enum.AutomaticSize.Y;
+		settChildren.CanvasSize = UDim2.new(0, 0, 1, 0);
+		settChildren.Parent = settPane;
 
-		local infoWindowList = Instance.new("UIListLayout");
-		infoWindowList.SortOrder = Enum.SortOrder.LayoutOrder;
-		infoWindowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
-		infoWindowList.Parent = infoChildren;
+		local settWindowList = Instance.new("UIListLayout");
+		settWindowList.SortOrder = Enum.SortOrder.LayoutOrder;
+		settWindowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+		settWindowList.Parent = settChildren;
 
 		for i, v in components do
 			optionapi["Create" .. i] = function(_, settings)
-				return v(settings, infoChildren, categoryapi)
+				return v(settings, settChildren, categoryapi)
 			end
 		end
 
-		infoBack.MouseEnter:Connect(function()
-			infoBack.ImageColor3 = theme.Text;
+		settBack.MouseEnter:Connect(function()
+			settBack.ImageColor3 = theme.Text;
 		end);
-		infoBack.MouseLeave:Connect(function()
-			infoBack.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		settBack.MouseLeave:Connect(function()
+			settBack.ImageColor3 = color.Lighten(theme.Main, 0.37);
 		end);
-		infoBack.MouseButton1Click:Connect(function()
-			infoPane.Visible = false;
-			infoTooltip.Visible = true;
-			infoTooltip.Forced = false
+		settBack.MouseButton1Click:Connect(function()
+			settPane.Visible = false;
+			settTooltip.Visible = true;
+			settTooltip.Forced = false
 		end);
-		infoButton.MouseEnter:Connect(function()
-			infoIcon.ImageColor3 = theme.Text;
+		settButton.MouseEnter:Connect(function()
+			settIcon.ImageColor3 = theme.Text;
 		end);
-		infoButton.MouseLeave:Connect(function()
-			infoIcon.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		settButton.MouseLeave:Connect(function()
+			settIcon.ImageColor3 = color.Lighten(theme.Main, 0.37);
 		end);
-		infoButton.MouseButton1Click:Connect(function()
-			infoTooltip.Visible = false;
-			infoTooltip.Forced = true
-			infoPane.Visible = true;
+		settButton.MouseButton1Click:Connect(function()
+			settTooltip.Visible = false;
+			settTooltip.Forced = true
+			settPane.Visible = true;
 		end);
-		
-		infoWindowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+
+		settWindowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
 			if libraryapi.ThreadFix then
 				setthreadidentity(8)
 			end
-			
-			infoPane.Size = UDim2.fromOffset(220, 45 + infoWindowList.AbsoluteContentSize.Y / scale.Scale)
-			
+
+			settPane.Size = UDim2.fromOffset(220, 45 + settWindowList.AbsoluteContentSize.Y / scale.Scale)
+
 			for _, v in categoryapi.Buttons do
 				if v.Icon then
 					v.Object.Text = string.rep(' ', 33 * scale.Scale)..v.Name
@@ -1968,9 +2295,9 @@ function libraryapi:CreateCategory(categorySettings)
 		if inputService.TouchEnabled then
 			tooltipText = (moduleSettings.Tooltip or "") .. "(Hold)"
 		end
- 
+
 		AddTooltip(moduleButton, tooltipText)
-		
+
 		-- arrow image
 		local arrow = Instance.new("ImageLabel");
 		arrow.Name = "Arrow";
@@ -2027,7 +2354,7 @@ function libraryapi:CreateCategory(categorySettings)
 
 			moduleButton.TextColor3 = self.Enabled and Color3.fromHSV(theme.Interface.Hue, theme.Interface.Sat, theme.Interface.Value) or theme.Text;
 			moduleButton.BackgroundColor3 = (hovered or moduleChildren.Visible) and color.Lighten(theme.Main, 0.02) or theme.Main
-			
+
 			if not self.Enabled then
 				for _, v in self.Connections do
 					v:Disconnect()
@@ -2194,21 +2521,21 @@ function libraryapi:CreateCategory(categorySettings)
 	return categoryapi
 end
 
-function libraryapi:CreateSetting(categorySettings)
+function libraryapi:CreateOverlay(categorySettings)
 	local window;
 	local categoryapi;
-	
- -- get asset
- categorySettings.Icon = getcustomasset(categorySettings.Icon)
+
+	-- get asset
+	categorySettings.Icon = getcustomasset(categorySettings.Icon)
 
 	categoryapi = {
-		Type = "Setting";
+		Type = "Overlay";
 		Expanded = false;
-		Button = self.Settings:CreateToggle({
-		Name = categorySettings.Name;
+		Button = self.Overlays:CreateToggle({
+			Name = categorySettings.Name;
 			Function = function(callback)
 				window.Visible = callback and (clickFrame.Visible or categoryapi.Pinned)
-				
+
 				if not callback then
 					for _, v in categoryapi.Connections do
 						v:Disconnect()
@@ -2229,7 +2556,7 @@ function libraryapi:CreateSetting(categorySettings)
 	}
 
 	window = Instance.new("TextButton");
-	window.Name = categorySettings.Name .. "Setting";
+	window.Name = categorySettings.Name .. "Overlay";
 	window.Size = UDim2.fromOffset(categorySettings.CategorySize or 220, 41);
 	window.Position = UDim2.fromOffset(240, 46);
 	window.BackgroundColor3 = theme.Main;
@@ -2302,7 +2629,7 @@ function libraryapi:CreateSetting(categorySettings)
 
 		self.Expanded = not self.Expanded;
 		children.Visible = self.Expanded;
-		
+
 		if self.Expanded then
 			window.Size = UDim2.fromOffset(window.Size.X.Offset, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601));
 		else
@@ -2357,7 +2684,7 @@ function libraryapi:CreateSetting(categorySettings)
 		end
 
 		children.CanvasSize = UDim2.fromOffset(0, windowList.AbsoluteContentSize.Y / scale.Scale);
-		
+
 		if categoryapi.Expanded then
 			window.Size = UDim2.fromOffset(window.Size.X.Offset, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601));
 		end
@@ -2584,7 +2911,7 @@ function libraryapi:Uninject()
 	end
 
 	for _, v in self.Categories do
-		if v.Type == "Setting" and v.Button.Enabled then
+		if v.Type == "Overlay" and v.Button.Enabled then
 			v.Button:Toggle()
 		end
 	end
@@ -2608,8 +2935,9 @@ function libraryapi:Uninject()
 	LoopClean(libraryapi)
 
 	shared.baya = nil
- 	shared.Init = nil
+	shared.Init = nil
 end
+
 
 -- clean
 libraryapi:Clean(gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
@@ -2656,5 +2984,188 @@ libraryapi:Clean(inputService.InputEnded:Connect(function(inputObj)
 		table.remove(libraryapi.Keybinds.Held, index)
 	end
 end))
+
+--[[
+	Creation
+]]
+local main = libraryapi:CreateGUI();
+main:CreateDivider()
+
+main:CreateOverlayBar()
+--[[
+	Target Info
+]]
+local targetinfo
+local targetinfoobj
+local targetinfobcolor
+
+targetinfoobj = libraryapi:CreateOverlay({
+	Name = "Target Info";
+	Icon = getcustomasset("Baya/Assets/TargetInfoIcon.png");
+	Size = UDim2.fromOffset(14, 14);
+	Position = UDim2.fromOffset(12, 14);
+	CategorySize = 240;
+	Function = function(callback)
+		if callback then
+			task.spawn(function()
+				repeat
+					targetinfo:UpdateInfo()
+					task.wait()
+				until not targetinfoobj.Button or not targetinfoobj.Button.Enabled
+			end)
+		end
+	end
+})
+
+-- ui
+local targetinfobkg = Instance.new("Frame")
+targetinfobkg.Size = UDim2.fromOffset(240, 89)
+targetinfobkg.BackgroundColor3 = color.Darken(theme.Main, 0.1)
+targetinfobkg.BackgroundTransparency = 0.5
+targetinfobkg.Parent = targetinfoobj.Children
+
+local targetinfoshot = Instance.new("ImageLabel")
+targetinfoshot.Size = UDim2.fromOffset(26, 27)
+targetinfoshot.Position = UDim2.fromOffset(19, 17)
+targetinfoshot.BackgroundColor3 = theme.Main
+targetinfoshot.Image = "rbxthumb://type=AvatarHeadShot&id=1&w=420&h=420"
+targetinfoshot.Parent = targetinfobkg
+
+local targetinfoshotflash = Instance.new("Frame")
+targetinfoshotflash.Size = UDim2.fromScale(1, 1)
+targetinfoshotflash.BackgroundTransparency = 1
+targetinfoshotflash.BackgroundColor3 = Color3.new(1, 0, 0)
+targetinfoshotflash.Parent = targetinfoshot
+
+local targetinfoname = Instance.new("TextLabel")
+targetinfoname.Size = UDim2.fromOffset(145, 20)
+targetinfoname.Position = UDim2.fromOffset(54, 20)
+targetinfoname.BackgroundTransparency = 1
+targetinfoname.Text = "Target's Name"
+targetinfoname.TextXAlignment = Enum.TextXAlignment.Left
+targetinfoname.TextYAlignment = Enum.TextYAlignment.Top
+targetinfoname.TextScaled = true
+targetinfoname.TextColor3 = color.Lighten(theme.Text, 0.4)
+targetinfoname.TextStrokeTransparency = 1
+targetinfoname.FontFace = theme.Font
+
+local targetinfoshadow = targetinfoname:Clone()
+targetinfoshadow.Position = UDim2.fromOffset(55, 21)
+targetinfoshadow.TextColor3 = Color3.new()
+targetinfoshadow.TextTransparency = 0.65
+targetinfoshadow.Visible = false
+targetinfoshadow.Parent = targetinfobkg
+
+targetinfoname:GetPropertyChangedSignal("Size"):Connect(function()
+	targetinfoshadow.Size = targetinfoname.Size
+end)
+targetinfoname:GetPropertyChangedSignal("Text"):Connect(function()
+	targetinfoshadow.Text = targetinfoname.Text
+end)
+targetinfoname:GetPropertyChangedSignal("FontFace"):Connect(function()
+	targetinfoshadow.FontFace = targetinfoname.FontFace
+end)
+
+targetinfoname.Parent = targetinfobkg
+
+local targetinfohealthbkg = Instance.new("Frame")
+targetinfohealthbkg.Name = "HealthBKG"
+targetinfohealthbkg.Size = UDim2.fromOffset(200, 9)
+targetinfohealthbkg.Position = UDim2.fromOffset(20, 56)
+targetinfohealthbkg.BackgroundColor3 = theme.Main
+targetinfohealthbkg.BorderSizePixel = 0
+targetinfohealthbkg.Parent = targetinfobkg
+
+local targetinfohealth = targetinfohealthbkg:Clone()
+targetinfohealth.Size = UDim2.fromScale(0.8, 1)
+targetinfohealth.Position = UDim2.new()
+targetinfohealth.BackgroundColor3 = Color3.fromHSV(1 / 2.5, 0.89, 0.75)
+targetinfohealth.Parent = targetinfohealthbkg
+
+targetinfohealth:GetPropertyChangedSignal("Size"):Connect(function()
+	targetinfohealth.Visible = targetinfohealth.Size.X.Scale > 0.01
+end)
+
+local targetinfohealthextra = targetinfohealth:Clone()
+targetinfohealthextra.Size = UDim2.new()
+targetinfohealthextra.Position = UDim2.fromScale(1, 0)
+targetinfohealthextra.AnchorPoint = Vector2.new(1, 0)
+targetinfohealthextra.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+targetinfohealthextra.Visible = false
+targetinfohealthextra.Parent = targetinfohealthbkg
+targetinfohealthextra:GetPropertyChangedSignal("Size"):Connect(function()
+	targetinfohealthextra.Visible = targetinfohealthextra.Size.X.Scale > 0.01
+end)
+
+local targetinfob = Instance.new("UIStroke")
+targetinfob.Enabled = false
+targetinfob.Color = Color3.fromHSV(0.44, 1, 1)
+targetinfob.Parent = targetinfobkg
+
+local targetinfodisplay = targetinfoobj:CreateToggle({
+	Name = 'Use Displayname',
+	Default = true
+})
+
+local lasthealth = 0
+local lastmaxhealth = 0
+
+targetinfo = {
+	Targets = {},
+	Object = targetinfobkg,
+	UpdateInfo = function(self)
+		if not libraryapi.Libraries then return end
+
+		for i, v in self.Targets do
+			if v < tick() then
+				self.Targets[i] = nil
+			end
+		end
+
+		local v, highest = nil, tick()
+		for i, check in self.Targets do
+			if check > highest then
+				v = i
+				highest = check
+			end
+		end
+
+		targetinfobkg.Visible = v ~= nil or libraryapi.gui.ScaledFrame.ClickFrame.Visible
+		if v then
+			targetinfoname.Text = v.Player and (targetinfodisplay.Enabled and v.Player.DisplayName or v.Player.Name) or v.Character and v.Character.Name or targetinfoname.Text
+			targetinfoshot.Image = 'rbxthumb://type=AvatarHeadShot&id='..(v.Player and v.Player.UserId or 1)..'&w=420&h=420'
+
+			if not v.Character then
+				v.Health = v.Health or 0
+				v.MaxHealth = v.MaxHealth or 100
+			end
+
+			if v.Health ~= lasthealth or v.MaxHealth ~= lastmaxhealth then
+				local percent = math.max(v.Health / v.MaxHealth, 0)
+				tween:Tween(targetinfohealth, TweenInfo.new(0.3), {
+					Size = UDim2.fromScale(math.min(percent, 1), 1), BackgroundColor3 = Color3.fromHSV(math.clamp(percent / 2.5, 0, 1), 0.89, 0.75)
+				})
+				tween:Tween(targetinfohealthextra, TweenInfo.new(0.3), {
+					Size = UDim2.fromScale(math.clamp(percent - 1, 0, 0.8), 1)
+				})
+				if lasthealth > v.Health and self.LastTarget == v then
+					tween:Cancel(targetinfoshotflash)
+					targetinfoshotflash.BackgroundTransparency = 0.3
+					tween:Tween(targetinfoshotflash, TweenInfo.new(0.5), {
+						BackgroundTransparency = 1
+					})
+				end
+				lasthealth = v.Health
+				lastmaxhealth = v.MaxHealth
+			end
+
+			if not v.Character then table.clear(v) end
+			self.LastTarget = v
+		end
+		return v
+	end
+}
+
+libraryapi.Libraries.targetinfo = targetinfo
 
 return libraryapi
