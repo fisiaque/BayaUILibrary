@@ -1247,7 +1247,7 @@ libraryapi.Components = setmetatable(components, {
 AddMaid(libraryapi)
 
 -- folder creation
-for _, folder in {"Baya", "Baya/Commits", "Baya/Assets", "Baya/Games"} do
+for _, folder in {"Baya", "Baya/Commits", "Baya/Assets", "Baya/Games", "Baya/Libraries"} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -1266,6 +1266,7 @@ if commit == "main" or (isfile("Baya/Commits/Library.txt") and readfile("Baya/Co
     WipeFolder("Baya/Assets")
 	WipeFolder("Baya/Commits")
 	WipeFolder("Baya/Games")
+	WipeFolder("Baya/Libraries")
 	WipeFolder("Baya")
 end
 
