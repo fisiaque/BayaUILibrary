@@ -41,6 +41,10 @@ local tween = {
 	tweenstwo = {};
 }
 local assets = { 
+	["Baya/Assets/SettingsTab.png"] = "rbxassetid://86368377735020";
+	["Baya/Assets/SettingsIcon.png"] = "rbxassetid://135478816572832";
+	["Baya/Assets/Cog.png"] = "rbxassetid://70765920396000";
+	["Baya/Assets/Pin.png"] = "rbxassetid://113308222846418";
 	["Baya/Assets/Back.png"] = "rbxassetid://75316536217652";
 	["Baya/Assets/Close.png"] = "rbxassetid://102880067633676";
 	["Baya/Assets/Warning.png"] = "rbxassetid://125144969372589";
@@ -1462,6 +1466,246 @@ function libraryapi:CreateGUI()
 		components.Divider(textSettings, children)
 	end
 
+	function categoryapi:CreateSettingBar()
+		local optionapi = {Toggles = {}};
+
+		local bar = Instance.new("Frame");
+		bar.Name = "Settings";
+		bar.Size = UDim2.fromOffset(220, 36);
+		bar.BackgroundColor3 = theme.Main;
+		bar.BorderSizePixel = 0;
+		bar.Parent = children;
+
+		components.Divider(nil, bar)
+
+		local button = Instance.new("ImageButton");
+		button.Size = UDim2.fromOffset(24, 24);
+		button.Position = UDim2.new(1, -29, 0, 7);
+		button.BackgroundTransparency = 1;
+		button.AutoButtonColor = false;
+		button.Image = getcustomasset("Baya/Assets/SettingsIcon.png");
+		button.ImageColor3 = color.Lighten(theme.Main, 0.37);
+		button.Parent = bar;
+
+		AddTooltip(button, 'Open Settings Menu');
+
+		local shadow = Instance.new("TextButton");
+		shadow.Name = "Shadow";
+		shadow.Size = UDim2.new(1, 0, 1, -5);
+		shadow.BackgroundColor3 = Color3.new();
+		shadow.BackgroundTransparency = 1;
+		shadow.AutoButtonColor = false;
+		shadow.ClipsDescendants = true;
+		shadow.Visible = false;
+		shadow.Text = "";
+		shadow.Parent = window;
+
+		local window = Instance.new("Frame");
+		window.Size = UDim2.fromOffset(220, 42);
+		window.Position = UDim2.fromScale(0, 1);
+		window.BackgroundColor3 = theme.Main;
+		window.Parent = shadow;
+
+		local icon = Instance.new("ImageLabel");
+		icon.Name = "Icon";
+		icon.Size = UDim2.fromOffset(14, 12);
+		icon.Position = UDim2.fromOffset(10, 13);
+		icon.BackgroundTransparency = 1;
+		icon.Image = getcustomasset("Baya/Assets/SettingsTab.png")
+		icon.ImageColor3 = theme.Text;
+		icon.Parent = window;
+
+		local title = Instance.new("TextLabel");
+		title.Name = "Title";
+		title.Size = UDim2.new(1, -36, 0, 38);
+		title.Position = UDim2.fromOffset(36, 0);
+		title.BackgroundTransparency = 1;
+		title.Text = "Settings";
+		title.TextXAlignment = Enum.TextXAlignment.Left;
+		title.TextColor3 = theme.Text;
+		title.TextSize = 15;
+		title.FontFace = theme.Font;
+		title.Parent = window;
+
+		local close = CreateCloseButton(window, 7);
+
+		local divider = Instance.new("Frame");
+		divider.Name = "Divider";
+		divider.Size = UDim2.new(1, 0, 0, 1);
+		divider.Position = UDim2.fromOffset(0, 37);
+		divider.BackgroundColor3 = color.Lighten(theme.Main, 0.02);
+		divider.BorderSizePixel = 0;
+		divider.Parent = window;
+
+		local childrenToggle = Instance.new("Frame");
+		childrenToggle.Position = UDim2.fromOffset(0, 38);
+		childrenToggle.BackgroundTransparency = 1;
+		childrenToggle.Parent = window;
+
+		local windowList = Instance.new("UIListLayout");
+		windowList.SortOrder = Enum.SortOrder.LayoutOrder;
+		windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+		windowList.Parent = childrenToggle;
+
+		function optionapi:CreateToggle(toggleSettings)
+			local toggleapi = {
+				Enabled = false;
+				Index = GetTableSize(optionapi.Toggles);
+			}
+
+			local hovered = false;
+
+			local toggle = Instance.new("TextButton");
+			toggle.Name = toggleSettings.Name .. "Toggle";
+			toggle.Size = UDim2.new(1, 0, 0, 40);
+			toggle.BackgroundTransparency = 1;
+			toggle.AutoButtonColor = false;
+			toggle.Text = string.rep(" ", 33 * scale.Scale) .. toggleSettings.Name;
+			toggle.TextXAlignment = Enum.TextXAlignment.Left;
+			toggle.TextColor3 = color.Darken(theme.Text, 0.16);
+			toggle.TextSize = 14;
+			toggle.FontFace = theme.Font;
+			toggle.Parent = childrenToggle;
+
+			local icon = Instance.new("ImageLabel");
+			icon.Name = "Icon";
+			icon.Size = toggleSettings.Size;
+			icon.Position = toggleSettings.Position;
+			icon.BackgroundTransparency = 1;
+			icon.Image = toggleSettings.Icon;
+			icon.ImageColor3 = theme.Text;
+			icon.Parent = toggle;
+
+			local knob = Instance.new("Frame");
+			knob.Name = "Knob";
+			knob.Size = UDim2.fromOffset(22, 12);
+			knob.Position = UDim2.new(1, -30, 0, 14);
+			knob.BackgroundColor3 = color.Lighten(theme.Main, 0.14);
+			knob.Parent = toggle;
+
+			local knobMain = knob:Clone();
+			knobMain.Size = UDim2.fromOffset(8, 8);
+			knobMain.Position = UDim2.fromOffset(2, 2);
+			knobMain.BackgroundColor3 = theme.Main;
+			knobMain.Parent = knob;
+
+			toggleapi.Object = toggle;
+
+			function toggleapi:Toggle()
+				self.Enabled = not self.Enabled;
+
+				tween:Tween(knob, theme.Tween, {
+					BackgroundColor3 = self.Enabled and Color3.fromHSV(
+						theme.Interface.Hue,
+						theme.Interface.Sat,
+						theme.Interface.Value
+					) or (hovered and color.Lighten(theme.Main, 0.37) or color.Lighten(theme.Main, 0.14))
+				})
+
+				tween:Tween(knobMain, theme.Tween, {
+					Position = UDim2.fromOffset(self.Enabled and 12 or 2, 2);
+				})
+
+				toggleSettings.Function(self.Enabled);
+			end
+
+			scale:GetPropertyChangedSignal("Scale"):Connect(function()
+				toggle.Text = string.rep(" ", 33 * scale.Scale) .. toggleSettings.Name;
+			end)
+
+			toggle.MouseEnter:Connect(function()
+				hovered = true
+
+				if not toggleapi.Enabled then
+					tween:Tween(knob, theme.Tween, {
+						BackgroundColor3 = color.Lighten(theme.Main, 0.37)
+					});
+				end
+			end)
+			toggle.MouseLeave:Connect(function()
+				hovered = false
+
+				if not toggleapi.Enabled then
+					tween:Tween(knob, theme.Tween, {
+						BackgroundColor3 = color.Lighten(theme.Main, 0.14)
+					})
+				end
+			end)
+			toggle.MouseButton1Click:Connect(function()
+				toggleapi:Toggle();
+			end)
+
+			table.insert(optionapi.Toggles, toggleapi);
+
+			return toggleapi
+		end
+
+		button.MouseEnter:Connect(function()
+			button.ImageColor3 = theme.Text;
+
+			tween:Tween(button, theme.Tween, {
+				BackgroundTransparency = 0.9
+			});
+		end)
+		button.MouseLeave:Connect(function()
+			button.ImageColor3 = color.Lighten(theme.Main, 0.37);
+
+			tween:Tween(button, theme.Tween, {
+				BackgroundTransparency = 1
+			});
+		end)
+		button.MouseButton1Click:Connect(function()
+			shadow.Visible = true;
+
+			tween:Tween(shadow, theme.Tween, {
+				BackgroundTransparency = 0.5
+			});
+			tween:Tween(window, theme.Tween, {
+				Position = UDim2.new(0, 0, 1, -(window.Size.Y.Offset))
+			});
+		end)
+
+		close.MouseButton1Click:Connect(function()
+			tween:Tween(shadow, theme.Tween, {
+				BackgroundTransparency = 1
+			});
+			tween:Tween(window, theme.Tween, {
+				Position = UDim2.fromScale(0, 1)
+			});
+
+			task.wait(0.2)
+
+			shadow.Visible = false
+		end);
+
+		shadow.MouseButton1Click:Connect(function()
+			tween:Tween(shadow, theme.Tween, {
+				BackgroundTransparency = 1
+			});
+			tween:Tween(window, theme.Tween, {
+				Position = UDim2.fromScale(0, 1)
+			});
+
+			task.wait(0.2)
+
+			shadow.Visible = false
+		end)
+
+		windowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			if libraryapi.ThreadFix then
+				setthreadidentity(8);
+			end
+
+			window.Size = UDim2.fromOffset(220, math.min(37 + windowList.AbsoluteContentSize.Y / scale.Scale, 605));
+
+			childrenToggle.Size = UDim2.fromOffset(220, window.Size.Y.Offset - 5);
+		end)
+
+		libraryapi.Settings = optionapi
+
+		return optionapi
+	end
+
 	function categoryapi:CreateInfoPane(categorySettings)
 		local optionapi = {};
 
@@ -1949,6 +2193,186 @@ function libraryapi:CreateCategory(categorySettings)
 	return categoryapi
 end
 
+function libraryapi:CreateSetting(categorySettings)
+	local window;
+	local categoryapi;
+	
+	categoryapi = {
+		Type = "Setting";
+		Expanded = false;
+		Button = self.Settings:CreateToggle({
+		Name = categorySettings.Name;
+			Function = function(callback)
+				window.Visible = callback and (clickFrame.Visible or categoryapi.Pinned)
+				
+				if not callback then
+					for _, v in categoryapi.Connections do
+						v:Disconnect()
+					end
+					table.clear(categoryapi.Connections)
+				end
+
+				if categorySettings.Function then
+					task.spawn(categorySettings.Function, callback)
+				end
+			end;
+			Icon = categorySettings.Icon;
+			Size = categorySettings.Size;
+			Position = categorySettings.Position;
+		});
+		Pinned = false,
+		Options = {}
+	}
+
+	window = Instance.new("TextButton");
+	window.Name = categorySettings.Name .. "Setting";
+	window.Size = UDim2.fromOffset(categorySettings.CategorySize or 220, 41);
+	window.Position = UDim2.fromOffset(240, 46);
+	window.BackgroundColor3 = theme.Main;
+	window.AutoButtonColor = false;
+	window.Visible = false;
+	window.Text = "";
+	window.Parent = scaledFrame;
+
+	Dragify(window);
+
+	local icon = Instance.new("ImageLabel");
+	icon.Name = "Icon";
+	icon.Size = categorySettings.Size;
+	icon.Position = UDim2.fromOffset(12, (icon.Size.X.Offset > 14 and 14 or 13));
+	icon.BackgroundTransparency = 1;
+	icon.Image = categorySettings.Icon;
+	icon.ImageColor3 = theme.Text;
+	icon.Parent = window;
+
+	local title = Instance.new("TextLabel");
+	title.Name = "Title";
+	title.Size = UDim2.new(1, -32, 0, 41);
+	title.Position = UDim2.fromOffset(math.abs(title.Size.X.Offset), 0);
+	title.BackgroundTransparency = 1;
+	title.Text = categorySettings.Name;
+	title.TextXAlignment = Enum.TextXAlignment.Left;
+	title.TextColor3 = theme.Text;
+	title.TextSize = 13;
+	title.FontFace = theme.Font;
+	title.Parent = window;
+
+	local pin = Instance.new("ImageButton");
+	pin.Name = "Pin";
+	pin.Size = UDim2.fromOffset(16, 16);
+	pin.Position = UDim2.new(1, -47, 0, 12);
+	pin.BackgroundTransparency = 1;
+	pin.AutoButtonColor = false;
+	pin.Image = getcustomasset("Baya/Assets/Pin.png");
+	pin.ImageColor3 = color.Darken(theme.Text, 0.43);
+	pin.Parent = window;
+
+	local customChildren = Instance.new("Frame");
+	customChildren.Name = "CustomChildren";
+	customChildren.Size = UDim2.new(1, 0, 0, 200);
+	customChildren.Position = UDim2.fromScale(0, 1);
+	customChildren.BackgroundTransparency = 1;
+	customChildren.Parent = window;
+
+	local children = Instance.new("ScrollingFrame");
+	children.Name = "Children";
+	children.Size = UDim2.new(1, 0, 1, -41);
+	children.Position = UDim2.fromOffset(0, 37);
+	children.BackgroundColor3 = color.Darken(theme.Main, 0.02);
+	children.BorderSizePixel = 0;
+	children.Visible = false;
+	children.ScrollBarThickness = 2;
+	children.ScrollBarImageTransparency = 0.75;
+	children.CanvasSize = UDim2.new();
+	children.Parent = window;
+
+	local windowList = Instance.new("UIListLayout");
+	windowList.SortOrder = Enum.SortOrder.LayoutOrder;
+	windowList.HorizontalAlignment = Enum.HorizontalAlignment.Center;
+	windowList.Parent = children;
+
+	AddMaid(categoryapi);
+
+	function categoryapi:Expand(check)
+		if check then return end
+
+		self.Expanded = not self.Expanded;
+		children.Visible = self.Expanded;
+		
+		if self.Expanded then
+			window.Size = UDim2.fromOffset(window.Size.X.Offset, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601));
+		else
+			window.Size = UDim2.fromOffset(window.Size.X.Offset, 41);
+		end
+	end
+
+	function categoryapi:Pin()
+		self.Pinned = not self.Pinned;
+		pin.ImageColor3 = self.Pinned and theme.Text or color.Darken(theme.Text, 0.43);
+	end
+
+	function categoryapi:Update()
+		window.Visible = self.Button.Enabled and (clickFrame.Visible or self.Pinned);
+
+		if self.Expanded then
+			self:Expand()
+		end
+
+		if clickFrame.Visible then
+			window.Size = UDim2.fromOffset(window.Size.X.Offset, 41);
+			window.BackgroundTransparency = 0;
+			icon.Visible = true;
+			title.Visible = true;
+			pin.Visible = true;
+		else
+			window.Size = UDim2.fromOffset(window.Size.X.Offset, 0);
+			window.BackgroundTransparency = 1;
+			icon.Visible = false;
+			title.Visible = false;
+			pin.Visible = false;
+		end
+	end
+
+	for i, v in components do
+		categoryapi['Create'..i] = function(self, optionSettings)
+			return v(optionSettings, children, categoryapi)
+		end
+	end
+
+	pin.MouseButton1Click:Connect(function()
+		categoryapi:Pin()
+	end)
+
+	window.MouseButton2Click:Connect(function()
+		categoryapi:Expand(true)
+	end)
+
+	windowList:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+		if self.ThreadFix then
+			setthreadidentity(8);
+		end
+
+		children.CanvasSize = UDim2.fromOffset(0, windowList.AbsoluteContentSize.Y / scale.Scale);
+		
+		if categoryapi.Expanded then
+			window.Size = UDim2.fromOffset(window.Size.X.Offset, math.min(41 + windowList.AbsoluteContentSize.Y / scale.Scale, 601));
+		end
+	end)
+
+	self:Clean(clickFrame:GetPropertyChangedSignal('Visible'):Connect(function()
+		categoryapi:Update();
+	end))
+
+	categoryapi:Update()
+
+	categoryapi.Object = window
+	categoryapi.Children = customChildren
+
+	self.Categories[categorySettings.Name] = categoryapi
+
+	return categoryapi
+end
+
 function libraryapi:Load()
 	local saveCheck = true
 
@@ -2156,7 +2580,7 @@ function libraryapi:Uninject()
 	end
 
 	for _, v in self.Categories do
-		if v.Type == "Overlay" and v.Button.Enabled then
+		if v.Type == "Setting" and v.Button.Enabled then
 			v.Button:Toggle()
 		end
 	end
