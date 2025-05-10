@@ -48,6 +48,21 @@ info:CreateDivider({ -- add text
 });
 ```
 
+Create Settings Overlay:
+```lua
+main:CreateSettingBar()
+
+local uiSettings = library:CreateSetting({
+	Name = "Test";
+	Icon = getcustomasset("Baya/Assets/Cog.png");
+	Size = UDim2.fromOffset(16, 12);
+	Position = UDim2.fromOffset(12, 14);
+	Function = function(val)
+		library:CreateNotification("Settings[test]", tostring(val), 2, "Alert")
+	end
+});
+```
+
 Create Category:
 ```lua
 local test = shared.baya:CreateCategory({
@@ -124,6 +139,18 @@ test:CreateSlider({
 	end,
 	Tooltip = "Are you COOL!"
 });
+```
+
+Create Dropdown List:
+```lua
+test:CreateDropdown({
+	Name = 'Hello Baya',
+	List = {"Baya1", "Baya2", "Baya3", "Baya4"},
+	Function = function(value)
+		shared.baya:CreateNotification("Dropdown", value, 2, "Alert")
+	end,
+	Tooltip = "Baya UI Library!"
+})
 ```
 
 Create TextBox:
